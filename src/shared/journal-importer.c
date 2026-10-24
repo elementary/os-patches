@@ -290,7 +290,7 @@ int journal_importer_process_data(JournalImporter *imp) {
 
         switch (imp->state) {
         case IMPORTER_STATE_LINE: {
-                char *line, *sep;
+                char *line = NULL;  /* avoid false maybe-uninitialized warning */
                 size_t n = 0;
 
                 assert(imp->data_size == 0);
@@ -315,7 +315,7 @@ int journal_importer_process_data(JournalImporter *imp) {
                    COREDUMP\n
                    LLLLLLLL0011223344...\n
                 */
-                sep = memchr(line, '=', n);
+                char *sep = memchr(line, '=', n);
                 if (sep) {
                         /* chomp newline */
                         n--;
@@ -323,7 +323,7 @@ int journal_importer_process_data(JournalImporter *imp) {
                         if (!journal_field_valid(line, sep - line, true)) {
                                 char buf[64], *t;
 
-                                t = strndupa_safe(line, sep - line);
+                                t = strndupa_safe(line, MIN((size_t) (sep - line), sizeof buf));
                                 log_debug("Ignoring invalid field: \"%s\"",
                                           cellescape(buf, sizeof buf, t));
 
@@ -342,7 +342,7 @@ int journal_importer_process_data(JournalImporter *imp) {
                         if (!journal_field_valid(line, n - 1, true)) {
                                 char buf[64], *t;
 
-                                t = strndupa_safe(line, n - 1);
+                                t = strndupa_safe(line, MIN(n - 1, sizeof buf));
                                 log_debug("Ignoring invalid field: \"%s\"",
                                           cellescape(buf, sizeof buf, t));
 

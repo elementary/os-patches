@@ -1003,7 +1003,7 @@ _public_ uint64_t sd_json_variant_unsigned(sd_json_variant *v) {
         if (!json_variant_is_regular(v))
                 goto mismatch;
         if (v->is_reference)
-                return sd_json_variant_integer(v->reference);
+                return sd_json_variant_unsigned(v->reference);
 
         switch (v->type) {
 
@@ -3117,6 +3117,12 @@ static int json_parse_internal(
                                 goto finish;
                         }
 
+                        /* n_stack includes the top level entry, hence > instead of >= */
+                        if (n_stack > DEPTH_MAX) {
+                                r = -ELNRNG;
+                                goto finish;
+                        }
+
                         if (!GREEDY_REALLOC(stack, n_stack+1)) {
                                 r = -ENOMEM;
                                 goto finish;
@@ -3165,6 +3171,12 @@ static int json_parse_internal(
                 case JSON_TOKEN_ARRAY_OPEN:
                         if (!IN_SET(current->expect, EXPECT_TOPLEVEL, EXPECT_OBJECT_VALUE, EXPECT_ARRAY_FIRST_ELEMENT, EXPECT_ARRAY_NEXT_ELEMENT)) {
                                 r = -EINVAL;
+                                goto finish;
+                        }
+
+                        /* n_stack includes the top level entry, hence > instead of >= */
+                        if (n_stack > DEPTH_MAX) {
+                                r = -ELNRNG;
                                 goto finish;
                         }
 
@@ -3542,7 +3554,7 @@ _public_ int sd_json_buildv(sd_json_variant **ret, va_list ap) {
                         if (current->n_suppress == 0) {
                                 _cleanup_free_ char *c = NULL;
 
-                                if (command == _JSON_BUILD_STRING_UNDERSCORIFY) {
+                                if (command == _JSON_BUILD_STRING_UNDERSCORIFY && p) {
                                         c = strdup(p);
                                         if (!c) {
                                                 r = -ENOMEM;
@@ -5252,10 +5264,8 @@ _public_ int sd_json_dispatch_full(
                                         done++;
 
                         } else  {
-                                if (flags & SD_JSON_ALLOW_EXTENSIONS) {
-                                        json_log(value, flags|SD_JSON_DEBUG, 0, "Unrecognized object field '%s', assuming extension.", sd_json_variant_string(key));
+                                if (flags & SD_JSON_ALLOW_EXTENSIONS)
                                         continue;
-                                }
 
                                 json_log(value, flags, 0, "Unexpected object field '%s'.", sd_json_variant_string(key));
                                 if (flags & SD_JSON_PERMISSIVE)
@@ -5272,7 +5282,7 @@ _public_ int sd_json_dispatch_full(
         for (const sd_json_dispatch_field *p = table; p && p->name; p++) {
                 sd_json_dispatch_flags_t merged_flags = p->flags | flags;
 
-                if ((merged_flags & SD_JSON_MANDATORY) && !found[p-table]) {
+                if ((p->flags & SD_JSON_MANDATORY) && !found[p-table]) {
                         json_log(v, merged_flags, 0, "Missing object field '%s'.", p->name);
 
                         if ((merged_flags & SD_JSON_PERMISSIVE))
@@ -5621,6 +5631,7 @@ _public_ int sd_json_dispatch_strv(const char *name, sd_json_variant *variant, s
         _cleanup_strv_free_ char **l = NULL;
         char ***s = userdata;
         sd_json_variant *e;
+        size_t n = 0;
         int r;
 
         assert_return(variant, -EINVAL);
@@ -5654,7 +5665,7 @@ _public_ int sd_json_dispatch_strv(const char *name, sd_json_variant *variant, s
                 if ((flags & SD_JSON_STRICT) && !string_is_safe(sd_json_variant_string(e)))
                         return json_log(e, flags, SYNTHETIC_ERRNO(EINVAL), "JSON field '%s' contains unsafe characters, refusing.", strna(name));
 
-                r = strv_extend(&l, sd_json_variant_string(e));
+                r = strv_extend_with_size(&l, &n, sd_json_variant_string(e));
                 if (r < 0)
                         return json_log(e, flags, r, "Failed to append array element: %m");
         }

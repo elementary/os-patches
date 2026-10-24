@@ -528,7 +528,7 @@ static int setup_matches(sd_device_enumerator *e) {
         STRV_FOREACH(a, arg_attr_match) {
                 _cleanup_free_ char *k = NULL, *v = NULL;
 
-                r = parse_key_value_argument(*a, /* require_value= */ true, &k, &v);
+                r = parse_key_value_argument(*a, /* require_value= */ false, &k, &v);
                 if (r < 0)
                         return r;
 
@@ -540,7 +540,7 @@ static int setup_matches(sd_device_enumerator *e) {
         STRV_FOREACH(a, arg_attr_nomatch) {
                 _cleanup_free_ char *k = NULL, *v = NULL;
 
-                r = parse_key_value_argument(*a, /* require_value= */ true, &k, &v);
+                r = parse_key_value_argument(*a, /* require_value= */ false, &k, &v);
                 if (r < 0)
                         return r;
 
@@ -653,16 +653,16 @@ static void cleanup_dir(DIR *dir, mode_t mask, int depth) {
  * entries for devices in /run/udev/data (such as "b8:16"), and removes
  * all files except those that haven't been deleted in /run/udev/data
  * (i.e. they were skipped during db cleanup because of the db_persist flag).
+ * If the database directory does not exist, all entries are considered stale.
  */
 static void cleanup_dir_after_db_cleanup(DIR *dir, DIR *datadir) {
         assert(dir);
-        assert(datadir);
 
         FOREACH_DIRENT_ALL(dent, dir, break) {
                 if (dot_or_dot_dot(dent->d_name))
                         continue;
 
-                if (faccessat(dirfd(datadir), dent->d_name, F_OK, AT_SYMLINK_NOFOLLOW) >= 0)
+                if (datadir && faccessat(dirfd(datadir), dent->d_name, F_OK, AT_SYMLINK_NOFOLLOW) >= 0)
                         /* The corresponding udev database file still exists.
                          * Assuming the persistent flag is set for the database. */
                         continue;
@@ -673,7 +673,6 @@ static void cleanup_dir_after_db_cleanup(DIR *dir, DIR *datadir) {
 
 static void cleanup_dirs_after_db_cleanup(DIR *dir, DIR *datadir) {
         assert(dir);
-        assert(datadir);
 
         FOREACH_DIRENT_ALL(dent, dir, break) {
                 struct stat stats;
@@ -1183,20 +1182,12 @@ static int parse_argv(int argc, char *argv[]) {
                         break;
 
                 case ARG_ATTR_MATCH:
-                        if (!strchr(optarg, '='))
-                                return log_error_errno(SYNTHETIC_ERRNO(EINVAL),
-                                                "Expected <ATTR>=<value> instead of '%s'", optarg);
-
                         r = strv_extend(&arg_attr_match, optarg);
                         if (r < 0)
                                 return log_oom();
                         break;
 
                 case ARG_ATTR_NOMATCH:
-                        if (!strchr(optarg, '='))
-                                return log_error_errno(SYNTHETIC_ERRNO(EINVAL),
-                                                "Expected <ATTR>=<value> instead of '%s'", optarg);
-
                         r = strv_extend(&arg_attr_nomatch, optarg);
                         if (r < 0)
                                 return log_oom();

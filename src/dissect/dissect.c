@@ -987,7 +987,6 @@ static int action_dissect(
         _cleanup_(sd_json_variant_unrefp) sd_json_variant *v = NULL;
         _cleanup_(table_unrefp) Table *t = NULL;
         _cleanup_free_ char *bn = NULL;
-        uint64_t size = UINT64_MAX;
         int r;
 
         assert(m);
@@ -1106,7 +1105,7 @@ static int action_dissect(
                 r = sd_json_buildo(
                                 &v,
                                 SD_JSON_BUILD_PAIR_STRING("name", bn),
-                                SD_JSON_BUILD_PAIR_CONDITION(size != UINT64_MAX, "size", SD_JSON_BUILD_INTEGER(size)),
+                                SD_JSON_BUILD_PAIR_CONDITION(m->image_size != UINT64_MAX, "size", SD_JSON_BUILD_INTEGER(m->image_size)),
                                 SD_JSON_BUILD_PAIR_INTEGER("sectorSize", m->sector_size),
                                 SD_JSON_BUILD_PAIR_CONDITION(a >= 0, "architecture", SD_JSON_BUILD_STRING(architecture_to_string(a))),
                                 SD_JSON_BUILD_PAIR_CONDITION(!sd_id128_is_null(m->image_uuid), "imageUuid", SD_JSON_BUILD_UUID(m->image_uuid)),
@@ -1575,8 +1574,12 @@ static int action_list_or_mtree_or_copy_or_make_archive(DissectedImage *m, LoopD
 
                         /* We are looking at a directory. */
 
-                        target_fd = openat(dfd, bn, O_RDONLY|O_DIRECTORY|O_CLOEXEC);
+                        target_fd = openat(dfd, bn, O_RDONLY|O_DIRECTORY|O_CLOEXEC|O_NOFOLLOW);
                         if (target_fd < 0) {
+                                if (errno == ELOOP)
+                                        return log_error_errno(SYNTHETIC_ERRNO(ELOOP),
+                                                        "Refusing to copy directory to symlink destination '%s'.", arg_target);
+
                                 if (errno != ENOENT)
                                         return log_error_errno(errno, "Failed to open destination '%s': %m", arg_target);
 
@@ -2106,7 +2109,7 @@ static int run(int argc, char *argv[]) {
                         uint32_t loop_flags;
                         int open_flags;
 
-                        open_flags = FLAGS_SET(arg_flags, DISSECT_IMAGE_DEVICE_READ_ONLY) ? O_RDONLY : O_RDWR;
+                        open_flags = FLAGS_SET(arg_flags, DISSECT_IMAGE_DEVICE_READ_ONLY) ? O_RDONLY : -1;
                         loop_flags = FLAGS_SET(arg_flags, DISSECT_IMAGE_NO_PARTITION_TABLE) ? 0 : LO_FLAGS_PARTSCAN;
 
                         if (arg_in_memory)

@@ -381,7 +381,10 @@ static int varlink_idl_format_symbol(
 
                 /* Sooner or later we want to export this in a proper IDL language construct, see
                  * https://github.com/varlink/varlink.github.io/issues/26 – but for now export this as a
-                 * comment. */
+                 * comment.
+                 *
+                 * Until this is resolved upstream, consider this comment part of the API (i.e. don't change
+                 * only extend). It is used by tools like varlink-http-bridge. */
                 if ((symbol->symbol_flags & (SD_VARLINK_REQUIRES_MORE|SD_VARLINK_SUPPORTS_MORE)) != 0) {
                         fputs(colors[COLOR_COMMENT], f);
                         if (FLAGS_SET(symbol->symbol_flags, SD_VARLINK_REQUIRES_MORE))
@@ -1931,7 +1934,7 @@ int varlink_idl_validate_method_reply(const sd_varlink_symbol *method, sd_json_v
                 return -EBADMSG;
 
         /* If method replies have the "continues" flag set, but the method is not allowed to generate that, return a recognizable error */
-        if (FLAGS_SET(flags, SD_VARLINK_REPLY_CONTINUES) && (method->symbol_type & (SD_VARLINK_SUPPORTS_MORE|SD_VARLINK_REQUIRES_MORE)) == 0)
+        if (FLAGS_SET(flags, SD_VARLINK_REPLY_CONTINUES) && (method->symbol_flags & (SD_VARLINK_SUPPORTS_MORE|SD_VARLINK_REQUIRES_MORE)) == 0)
                 return -EBADE;
 
         return varlink_idl_validate_symbol(method, v, SD_VARLINK_OUTPUT, reterr_bad_field);

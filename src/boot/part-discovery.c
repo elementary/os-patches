@@ -57,7 +57,8 @@ static bool verify_gpt(/* const */ GptHeader *h, EFI_LBA lba_expected) {
         if (h->MyLBA != lba_expected)
                 return false;
 
-        if ((h->SizeOfPartitionEntry % sizeof(EFI_PARTITION_ENTRY)) != 0)
+        if (h->SizeOfPartitionEntry < sizeof(EFI_PARTITION_ENTRY) ||
+            (h->SizeOfPartitionEntry % sizeof(EFI_PARTITION_ENTRY)) != 0)
                 return false;
 
         if (h->NumberOfPartitionEntries <= 0 || h->NumberOfPartitionEntries > 1024)
@@ -117,6 +118,8 @@ static EFI_STATUS try_gpt(
 
         /* Now load the GPT entry table */
         size = ALIGN_TO((size_t) gpt->SizeOfPartitionEntry * (size_t) gpt->NumberOfPartitionEntries, 512);
+        if (size == SIZE_MAX) /* overflow check */
+                return EFI_OUT_OF_RESOURCES;
         entries_pages = xmalloc_aligned_pages(
                 AllocateMaxAddress,
                 EfiLoaderData,

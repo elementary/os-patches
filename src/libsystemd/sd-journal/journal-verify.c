@@ -124,7 +124,7 @@ static int hash_payload(JournalFile *f, Object *o, uint64_t offset, const uint8_
                 _cleanup_free_ void *b = NULL;
                 size_t b_size;
 
-                r = decompress_blob(c, src, size, &b, &b_size, 0);
+                r = decompress_blob(c, src, size, &b, &b_size, DATA_SIZE_MAX);
                 if (r < 0) {
                         error_errno(offset, r, "%s decompression failed: %m",
                                     compression_to_string(c));
@@ -589,7 +589,7 @@ static int verify_data_hash_table(
                 }
 
                 if (last != le64toh(f->data_hash_table[i].tail_hash_offset)) {
-                        error(p,
+                        error(last,
                               "Tail hash pointer mismatch in hash table (%"PRIu64" != %"PRIu64")",
                               last,
                               le64toh(f->data_hash_table[i].tail_hash_offset));

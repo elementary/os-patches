@@ -265,7 +265,7 @@ static int context_load_installed_instances(Context *c) {
 
         assert(c);
 
-        log_info("Discovering installed instances%s", glyph(GLYPH_ELLIPSIS));
+        log_debug("Discovering installed instances%s", glyph(GLYPH_ELLIPSIS));
 
         FOREACH_ARRAY(tr, c->transfers, c->n_transfers) {
                 Transfer *t = *tr;
@@ -349,7 +349,7 @@ static int context_discover_update_sets_by_flag(Context *c, UpdateSetFlags flags
                                 if (boundary && strverscmp_improved(i->metadata.version, boundary) >= 0)
                                         continue; /* Not older than the boundary */
 
-                                if (cursor && strverscmp(i->metadata.version, cursor) <= 0)
+                                if (cursor && strverscmp_improved(i->metadata.version, cursor) <= 0)
                                         break; /* Not newer than the cursor. The same will be true for all
                                                 * subsequent instances (due to sorting) so let's skip to the
                                                 * next transfer. */

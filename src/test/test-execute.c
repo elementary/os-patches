@@ -77,20 +77,29 @@ static void wait_for_service_finish(Manager *m, Unit *unit) {
 
         ASSERT_NOT_NULL(m);
 
-        /* Bump the timeout when running in plain QEMU, as some more involved tests might start hitting the
-         * default 2m timeout (like exec-dynamicuser-statedir.service) */
-        if (detect_virtualization() == VIRTUALIZATION_QEMU)
+        /* Bump the timeout when running in plain QEMU or in CI, as some more involved tests might start
+         * hitting the default 2m timeout (like exec-dynamicuser-statedir.service). */
+        if (detect_virtualization() == VIRTUALIZATION_QEMU || ci_environment())
                 timeout *= 2;
 
         printf("%s\n", unit->id);
         exec_context_dump(&service->exec_context, stdout, "\t");
 
+        /* Use a per-Exec timeout rather than a service timeout, as especially under sanitizers some test
+         * units running many commands can hit the service timeout. */
         _cleanup_(sd_event_source_unrefp) sd_event_source *s = NULL;
         ASSERT_OK(sd_event_add_time_relative(m->event, &s, CLOCK_MONOTONIC, timeout, 0, time_handler, unit));
 
         /* Here, sd_event_loop() cannot be used, as the sd_event object will be reused in the next test case. */
-        while (!IN_SET(service->state, SERVICE_DEAD, SERVICE_FAILED))
+        ExecCommand *last_command = service->main_command;
+        while (!IN_SET(service->state, SERVICE_DEAD, SERVICE_FAILED)) {
                 ASSERT_OK(sd_event_run(m->event, 100 * USEC_PER_MSEC));
+
+                if (service->main_command != last_command) {
+                        last_command = service->main_command;
+                        ASSERT_OK(sd_event_source_set_time_relative(s, timeout));
+                }
+        }
 }
 
 static void check_main_result(const char *file, unsigned line, const char *func,
@@ -323,11 +332,27 @@ static void _test_service(const char *file, unsigned line, const char *func,
 static void test_exec_bindpaths(Manager *m) {
         ASSERT_OK(mkdir_p("/tmp/test-exec-bindpaths", 0755));
         ASSERT_OK(mkdir_p("/tmp/test-exec-bindreadonlypaths", 0755));
+        ASSERT_OK(mkdir_p("/tmp/test-exec-bindpaths source", 0755));
+        ASSERT_OK(mkdir_p("/tmp/test-exec-bindpaths destination", 0755));
+        ASSERT_OK(mkdir_p("/tmp/test-exec-bindpaths:source", 0755));
+        ASSERT_OK(mkdir_p("/tmp/test-exec-bindpaths:destination", 0755));
+        ASSERT_OK(mkdir_p("/tmp/test-exec-bindreadonlypaths source", 0755));
+        ASSERT_OK(mkdir_p("/tmp/test-exec-bindreadonlypaths destination", 0755));
+        ASSERT_OK(mkdir_p("/tmp/test-exec-bindreadonlypaths:source", 0755));
+        ASSERT_OK(mkdir_p("/tmp/test-exec-bindreadonlypaths:destination", 0755));
 
         test(m, "exec-bindpaths.service", can_unshare ? 0 : EXIT_NAMESPACE, CLD_EXITED);
 
         (void) rm_rf("/tmp/test-exec-bindpaths", REMOVE_ROOT|REMOVE_PHYSICAL);
         (void) rm_rf("/tmp/test-exec-bindreadonlypaths", REMOVE_ROOT|REMOVE_PHYSICAL);
+        (void) rm_rf("/tmp/test-exec-bindpaths source", REMOVE_ROOT|REMOVE_PHYSICAL);
+        (void) rm_rf("/tmp/test-exec-bindpaths destination", REMOVE_ROOT|REMOVE_PHYSICAL);
+        (void) rm_rf("/tmp/test-exec-bindpaths:source", REMOVE_ROOT|REMOVE_PHYSICAL);
+        (void) rm_rf("/tmp/test-exec-bindpaths:destination", REMOVE_ROOT|REMOVE_PHYSICAL);
+        (void) rm_rf("/tmp/test-exec-bindreadonlypaths source", REMOVE_ROOT|REMOVE_PHYSICAL);
+        (void) rm_rf("/tmp/test-exec-bindreadonlypaths destination", REMOVE_ROOT|REMOVE_PHYSICAL);
+        (void) rm_rf("/tmp/test-exec-bindreadonlypaths:source", REMOVE_ROOT|REMOVE_PHYSICAL);
+        (void) rm_rf("/tmp/test-exec-bindreadonlypaths:destination", REMOVE_ROOT|REMOVE_PHYSICAL);
 }
 
 static void test_exec_cpuaffinity(Manager *m) {
@@ -1137,6 +1162,10 @@ static void test_exec_runtimedirectory(Manager *m) {
         (void) rm_rf("/run/test-exec_runtimedirectory2", REMOVE_ROOT|REMOVE_PHYSICAL);
         test(m, "exec-runtimedirectory.service", 0, CLD_EXITED);
         (void) rm_rf("/run/test-exec_runtimedirectory2", REMOVE_ROOT|REMOVE_PHYSICAL);
+
+        (void) rm_rf("/run/test-exec_runtimedirectory-escape", REMOVE_ROOT|REMOVE_PHYSICAL);
+        test(m, "exec-runtimedirectory@foo\\x2dv1.service", 0, CLD_EXITED);
+        (void) rm_rf("/run/test-exec_runtimedirectory-escape", REMOVE_ROOT|REMOVE_PHYSICAL);
 
         test(m, "exec-runtimedirectory-mode.service", 0, CLD_EXITED);
         test(m, "exec-runtimedirectory-owner.service", MANAGER_IS_SYSTEM(m) ? 0 : EXIT_GROUP, CLD_EXITED);

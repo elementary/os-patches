@@ -454,6 +454,9 @@ bool stat_inode_unmodified(const struct stat *a, const struct stat *b) {
          * about contents of the file. The purpose here is to detect file contents changes, and nothing
          * else. */
 
+        assert(a);
+        assert(b);
+
         return stat_inode_same(a, b) &&
                 a->st_mtim.tv_sec == b->st_mtim.tv_sec &&
                 a->st_mtim.tv_nsec == b->st_mtim.tv_nsec &&
@@ -503,28 +506,101 @@ int xstatfsat(int dir_fd, const char *path, struct statfs *ret) {
 }
 
 usec_t statx_timestamp_load(const struct statx_timestamp *ts) {
+        assert(ts);
         return timespec_load(&(const struct timespec) { .tv_sec = ts->tv_sec, .tv_nsec = ts->tv_nsec });
 }
 nsec_t statx_timestamp_load_nsec(const struct statx_timestamp *ts) {
+        assert(ts);
         return timespec_load_nsec(&(const struct timespec) { .tv_sec = ts->tv_sec, .tv_nsec = ts->tv_nsec });
 }
 
 void inode_hash_func(const struct stat *q, struct siphash *state) {
+        assert(q);
+
         siphash24_compress_typesafe(q->st_dev, state);
         siphash24_compress_typesafe(q->st_ino, state);
+
+        /* Also include inode type, to mirror stat_inode_same() */
+        mode_t type = q->st_mode & S_IFMT;
+        siphash24_compress_typesafe(type, state);
 }
 
 int inode_compare_func(const struct stat *a, const struct stat *b) {
         int r;
 
+        assert(a);
+        assert(b);
+
         r = CMP(a->st_dev, b->st_dev);
         if (r != 0)
                 return r;
 
-        return CMP(a->st_ino, b->st_ino);
+        r = CMP(a->st_ino, b->st_ino);
+        if (r != 0)
+                return r;
+
+        return CMP(a->st_mode & S_IFMT, b->st_mode & S_IFMT);
 }
 
 DEFINE_HASH_OPS_WITH_KEY_DESTRUCTOR(inode_hash_ops, struct stat, inode_hash_func, inode_compare_func, free);
+
+void inode_unmodified_hash_func(const struct stat *q, struct siphash *state) {
+        assert(q);
+
+        inode_hash_func(q, state);
+
+        siphash24_compress_typesafe(q->st_mtim.tv_sec, state);
+        siphash24_compress_typesafe(q->st_mtim.tv_nsec, state);
+
+        if (S_ISREG(q->st_mode))
+                siphash24_compress_typesafe(q->st_size, state);
+        else {
+                uint64_t invalid = UINT64_MAX;
+                siphash24_compress_typesafe(invalid, state);
+        }
+
+        if (S_ISCHR(q->st_mode) || S_ISBLK(q->st_mode))
+                siphash24_compress_typesafe(q->st_rdev, state);
+        else {
+                dev_t invalid = (dev_t) -1;
+                siphash24_compress_typesafe(invalid, state);
+        }
+}
+
+int inode_unmodified_compare_func(const struct stat *a, const struct stat *b) {
+        int r;
+
+        assert(a);
+        assert(b);
+
+        r = inode_compare_func(a, b);
+        if (r != 0)
+                return r;
+
+        r = CMP(a->st_mtim.tv_sec, b->st_mtim.tv_sec);
+        if (r != 0)
+                return r;
+
+        r = CMP(a->st_mtim.tv_nsec, b->st_mtim.tv_nsec);
+        if (r != 0)
+                return r;
+
+        if (S_ISREG(a->st_mode)) {
+                r = CMP(a->st_size, b->st_size);
+                if (r != 0)
+                        return r;
+        }
+
+        if (S_ISCHR(a->st_mode) || S_ISBLK(a->st_mode)) {
+                r = CMP(a->st_rdev, b->st_rdev);
+                if (r != 0)
+                        return r;
+        }
+
+        return 0;
+}
+
+DEFINE_HASH_OPS_WITH_KEY_DESTRUCTOR(inode_unmodified_hash_ops, struct stat, inode_unmodified_hash_func, inode_unmodified_compare_func, free);
 
 const char* inode_type_to_string(mode_t m) {
 

@@ -368,7 +368,7 @@ static int manager_network_monitor_listen(Manager *m) {
         if (r < 0)
                 return r;
 
-        r = sd_event_source_set_priority(m->network_event_source, SD_EVENT_PRIORITY_IMPORTANT+5);
+        r = sd_event_source_set_priority(m->network_event_source, SD_EVENT_PRIORITY_IMPORTANT-5);
         if (r < 0)
                 return r;
 
@@ -659,6 +659,7 @@ static int manager_dispatch_reload_signal(sd_event_source *s, const struct signa
         m->unicast_scope = dns_scope_free(m->unicast_scope);
         m->delegates = hashmap_free(m->delegates);
         dns_trust_anchor_flush(&m->trust_anchor);
+        manager_etc_hosts_flush(m);
 
         manager_set_defaults(m);
 
@@ -948,6 +949,13 @@ int manager_recv(Manager *m, int fd, DnsProtocol protocol, DnsPacket **ret) {
         assert(ret);
 
         ms = next_datagram_size_fd(fd);
+        /* The MSG_PEEK recv() in next_datagram_size_fd() validates the datagram's checksum, and drops it if
+         * it is bad. Hence we can end up here with nothing left to read even though the event source said
+         * otherwise, and must treat that like the recvmsg_safe() below does: as "no packet", not as a
+         * failure. Our callers propagate a failure to the event loop, which would then turn the listening
+         * socket's event source off for good. */
+        if (ERRNO_IS_NEG_TRANSIENT(ms))
+                return 0;
         if (ms < 0)
                 return ms;
 

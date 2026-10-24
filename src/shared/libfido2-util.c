@@ -357,7 +357,7 @@ static int fido2_is_cred_in_specific_token(
         /* According to CTAP 2.1 specification, to do pre-flight we need to set up option to false
          * with optionally pinUvAuthParam in assertion[1]. But for authenticator that doesn't support
          * user presence, once up option is present, the authenticator may return CTAP2_ERR_UNSUPPORTED_OPTION[2].
-         * So we simplely omit the option in that case.
+         * So we simply omit the option in that case.
          * Reference:
          * 1: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-20210615.html#pre-flight
          * 2: https://fidoalliance.org/specs/fido-v2.0-ps-20190130/fido-client-to-authenticator-protocol-v2.0-ps-20190130.html#authenticatorGetAssertion (in step 5)
@@ -615,6 +615,8 @@ static int fido2_use_hmac_hash_specific_token(
                 return log_error_errno(SYNTHETIC_ERRNO(EIO), "Failed to retrieve HMAC secret.");
 
         hmac_size = sym_fido_assert_hmac_secret_len(a, 0);
+        /* Should never be zero, sanity check */
+        assert(hmac_size > 0);
 
         hmac_copy = memdup(hmac, hmac_size);
         if (!hmac_copy)
@@ -1114,6 +1116,8 @@ int fido2_generate_hmac_hash(
                 return log_error_errno(SYNTHETIC_ERRNO(EIO), "Failed to retrieve HMAC secret.");
 
         secret_size = sym_fido_assert_hmac_secret_len(a, 0);
+        /* Should never be zero, sanity check */
+        assert(secret_size > 0);
 
         secret_copy = memdup(secret, secret_size);
         if (!secret_copy)
@@ -1161,7 +1165,16 @@ static int check_device_is_fido2_with_hmac_secret(
 
         r = verify_features(d, path, LOG_DEBUG, ret_has_rk, ret_has_client_pin, ret_has_up, ret_has_uv, ret_has_always_uv);
         if (r == -ENODEV) { /* Not a FIDO2 device, or not implementing 'hmac-secret' */
-                *ret_has_rk = *ret_has_client_pin = *ret_has_up = *ret_has_uv = *ret_has_always_uv = false;
+                if (ret_has_rk)
+                        *ret_has_rk = false;
+                if (ret_has_client_pin)
+                        *ret_has_client_pin = false;
+                if (ret_has_up)
+                        *ret_has_up = false;
+                if (ret_has_uv)
+                        *ret_has_uv = false;
+                if (ret_has_always_uv)
+                        *ret_has_always_uv = false;
                 return false;
         }
         if (r < 0)

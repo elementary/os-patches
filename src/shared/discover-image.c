@@ -500,7 +500,7 @@ static int image_make(
                 (*ret)->foreign_uid_owned = uid_is_foreign(st->st_uid);
                 return 0;
 
-        } else if (S_ISREG(st->st_mode) && endswith(path, ".raw")) {
+        } else if (S_ISREG(st->st_mode) && (endswith(path, ".raw") || pretty)) {
                 usec_t crtime = 0;
 
                 /* It's a RAW disk image */
@@ -971,6 +971,10 @@ int image_discover(
                         const char *fname = de->d_name;
 
                         if (dot_or_dot_dot(fname))
+                                continue;
+
+                        /* Ignore sysupdate temporary files */
+                        if (startswith(fname, ".sysupdate."))
                                 continue;
 
                         _cleanup_close_ int fd = openat(dirfd(d), fname, O_PATH|O_CLOEXEC|open_flags);
@@ -1496,7 +1500,7 @@ static int unpriviled_clone(Image *i, const char *new_path) {
                         /* flags= */ 0,
                         &new_fd);
         if (r < 0)
-                return 0;
+                return r;
 
         /* Mount new image */
         _cleanup_close_ int target_fd = -EBADF;

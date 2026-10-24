@@ -122,19 +122,20 @@ static int property_get_cpu_affinity(
         _cleanup_(cpu_set_done) CPUSet s = {};
         _cleanup_free_ uint8_t *array = NULL;
         size_t allocated;
+        int r;
 
         assert(bus);
         assert(reply);
 
         if (c->cpu_affinity_from_numa) {
-                int r;
-
                 r = numa_to_cpu_set(&c->numa_policy, &s);
                 if (r < 0)
                         return r;
         }
 
-        (void) cpu_set_to_dbus(c->cpu_affinity_from_numa ? &s : &c->cpu_set,  &array, &allocated);
+        r = cpu_set_to_dbus(c->cpu_affinity_from_numa ? &s : &c->cpu_set, &array, &allocated);
+        if (r < 0)
+                return r;
 
         return sd_bus_message_append_array(reply, 'y', array, allocated);
 }
@@ -3448,6 +3449,9 @@ int bus_exec_context_set_transient_property(
                 if (r < 0)
                         return r;
 
+                if (strv_length(l) > ENVIRONMENT_ASSIGNMENTS_MAX)
+                        return sd_bus_error_set(reterr_error, SD_BUS_ERROR_LIMITS_EXCEEDED,
+                                                "Too many environment assignments.");
                 if (!strv_env_is_valid(l))
                         return sd_bus_error_set(reterr_error, SD_BUS_ERROR_INVALID_ARGS, "Invalid environment block.");
 
@@ -3482,6 +3486,9 @@ int bus_exec_context_set_transient_property(
                 if (r < 0)
                         return r;
 
+                if (strv_length(l) > ENVIRONMENT_ASSIGNMENTS_MAX)
+                        return sd_bus_error_set(reterr_error, SD_BUS_ERROR_LIMITS_EXCEEDED,
+                                                "Too many environment variable names or assignments.");
                 if (!strv_env_name_or_assignment_is_valid(l))
                         return sd_bus_error_set(reterr_error, SD_BUS_ERROR_INVALID_ARGS, "Invalid UnsetEnvironment= list.");
 
@@ -3634,6 +3641,9 @@ int bus_exec_context_set_transient_property(
                 if (r < 0)
                         return r;
 
+                if (strv_length(l) > ENVIRONMENT_ASSIGNMENTS_MAX)
+                        return sd_bus_error_set(reterr_error, SD_BUS_ERROR_LIMITS_EXCEEDED,
+                                                "Too many environment variable names.");
                 if (!strv_env_name_is_valid(l))
                         return sd_bus_error_set(reterr_error, SD_BUS_ERROR_INVALID_ARGS, "Invalid PassEnvironment= block.");
 

@@ -1,3 +1,60 @@
+systemd (259.9-0ubuntu0.1) resolute; urgency=medium
+
+  * New upstream version 259.9 (LP: #2167504)
+    - d/gbp.conf: set upstream branch to 259.x stable
+    - d/watch: track 259.x stable
+    - Update upstream source from tag 'upstream/259.9'
+      Update to upstream version '259.9'
+      with Debian dir 892b1f6f3b4572f8b134ba87f2bf7e1af1884194
+  * Drop patches included in new upstream version:
+    - CVE-2026-15060.patch.
+      Applied upstream: https://github.com/systemd/systemd/commit/93bf2fd1f5
+    - lp2148619-units-order-networkd-resolve-hook-After-network-pre.targe.patch.
+      Applied upstream: https://github.com/systemd/systemd/commit/55ee2c19a2
+    - CVE-2026-15059.patch.
+      Applied upstream: https://github.com/systemd/systemd/commit/967850cb99
+    - lp2155132-mkosi-trim-verity.sig-json-files-to-remove-NUL-padding-be.patch.
+      Applied upstream: https://github.com/systemd/systemd/commit/102a84a914
+    - lp2148619-units-drop-Before-sockets.target-from-networkd-resolve-ho.patch.
+      Applied upstream: https://github.com/systemd/systemd/commit/479a2dcb12
+    - GHSA-5rm9-cc37-35gq.patch.
+      Applied upstream: https://github.com/systemd/systemd/commit/958aefc3a5
+    - lp2150773-core-Open-netfilter-socket-only-when-needed.patch.
+      Applied upstream: https://github.com/systemd/systemd/commit/907f0482ea
+    - GHSA-2p9f-rcmv-x36h.patch.
+      Applied upstream: https://github.com/systemd/systemd/commit/b808894777
+    - GHSA-3jgj-3phh-hx5j/resolve-limit-the-number-NTAs-to-something-sensible.patch.
+      Applied upstream: https://github.com/systemd/systemd/commit/72c4686786
+    - GHSA-3jgj-3phh-hx5j/core-limit-the-number-of-units-that-can-be-requested-over.patch.
+      Applied upstream: https://github.com/systemd/systemd/commit/5bbb84ac27
+    - GHSA-3jgj-3phh-hx5j/sd-json-limit-the-number-of-env-variables-to-something-re.patch.
+      Applied upstream: https://github.com/systemd/systemd/commit/d40943d2b1
+    - GHSA-3jgj-3phh-hx5j/dbus-manager-limit-the-number-of-states-patterns-per-quer.patch.
+      Applied upstream: https://github.com/systemd/systemd/commit/cb6c3e5bf1
+    - GHSA-3jgj-3phh-hx5j/sd-json-user-record-store-the-strv-size-when-extending-it.patch.
+      Applied upstream: https://github.com/systemd/systemd/commit/b313f7cc8c
+    - GHSA-3jgj-3phh-hx5j/sd-bus-store-the-strv-size-when-extending-it.patch.
+      Applied upstream: https://github.com/systemd/systemd/commit/3865ea5579
+    - GHSA-3jgj-3phh-hx5j/dns-question-limit-the-number-of-questions-per-query.patch.
+      Applied upstream: https://github.com/systemd/systemd/commit/8bbeac804e
+    - GHSA-3jgj-3phh-hx5j/resolve-enforce-the-search-domain-limit-earlier.patch.
+      Applied upstream: https://github.com/systemd/systemd/commit/f48ced6cc4
+    - GHSA-m8q3-73v4-wvg7.patch.
+      Applied upstream: https://github.com/systemd/systemd/commit/8ecee45b24
+    - CVE-2026-16742/homed-verify-privileged-worker-changes.patch.
+      Applied upstream: https://github.com/systemd/systemd/commit/7de1a48462
+    - CVE-2026-16742/homed-fix-verification-of-local-identity-file.patch.
+      Applied upstream: https://github.com/systemd/systemd/commit/4365d4a3b7
+    - GHSA-3jgj-3phh-hx5j/dbus-limit-the-number-of-env-variables-to-something-reaso.patch.
+      Applied upstream: https://github.com/systemd/systemd/commit/271071eaa1
+    - lp2145027/ssh-proxy-return-an-error-if-user-supplies-VMADDR_CID_ANY.patch
+      Applied upstream: https://github.com/systemd/systemd/commit/6f5de2b522
+  * New changes:
+    - d/udev.install: install hwdb shell completion
+    - d/systemd.manpages: install missing manpages
+
+ -- Nick Rosbrook <enr0n@ubuntu.com>  Wed, 16 Sep 2026 10:55:31 -0400
+
 systemd (259.5-0ubuntu3.4) resolute-security; urgency=medium
 
   * SECURITY UPDATE: systemd-homed: local privilege escalation via missing

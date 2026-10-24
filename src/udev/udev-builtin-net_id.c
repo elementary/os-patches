@@ -22,7 +22,6 @@
 #include "device-private.h"
 #include "device-util.h"
 #include "dirent-util.h"
-#include "escape.h"
 #include "ether-addr-util.h"
 #include "fd-util.h"
 #include "fileio.h"
@@ -36,12 +35,6 @@
 
 #define ONBOARD_14BIT_INDEX_MAX ((1U << 14) - 1)
 #define ONBOARD_16BIT_INDEX_MAX ((1U << 16) - 1)
-
-static int log_invalid_device_attr(sd_device *dev, const char *attr, const char *value) {
-        _cleanup_free_ char *escaped = cescape(value);
-        return log_device_debug_errno(dev, SYNTHETIC_ERRNO(EINVAL),
-                                      "Invalid %s value '%s'.", attr, strnull(escaped));
-}
 
 static int device_get_parent_skip_virtio(sd_device *dev, sd_device **ret) {
         int r;
@@ -202,7 +195,7 @@ static int get_port_specifier(sd_device *dev, char **ret) {
                 }
 
                 if (!utf8_is_valid(phys_port_name) || string_has_cc(phys_port_name, /* ok= */ NULL))
-                        return log_invalid_device_attr(dev, "phys_port_name", phys_port_name);
+                        return log_device_debug_errno(dev, SYNTHETIC_ERRNO(EINVAL), "Invalid phys_port_name");
 
                 /* Otherwise, use phys_port_name as is. */
                 buf = strjoin("n", phys_port_name);
@@ -260,7 +253,7 @@ static int pci_get_onboard_index(sd_device *dev, unsigned *ret) {
                 return log_device_debug_errno(dev, SYNTHETIC_ERRNO(EINVAL),
                                               "Naming scheme does not allow onboard index==0.");
         if (!is_valid_onboard_index(idx))
-                return log_device_debug_errno(dev, SYNTHETIC_ERRNO(ENOENT),
+                return log_device_debug_errno(dev, SYNTHETIC_ERRNO(EINVAL),
                                               "Not a valid onboard index: %u", idx);
 
         *ret = idx;
@@ -309,7 +302,7 @@ static int names_pci_onboard_label(UdevEvent *event, sd_device *pci_dev, const c
                 return log_device_debug_errno(pci_dev, r, "Failed to get PCI onboard label: %m");
 
         if (!utf8_is_valid(label) || string_has_cc(label, /* ok= */ NULL))
-                return log_invalid_device_attr(dev, "label", label);
+                return log_device_debug_errno(dev, SYNTHETIC_ERRNO(EINVAL), "Invalid label");
 
         char str[ALTIFNAMSIZ];
         if (snprintf_ok(str, sizeof str, "%s%s",
@@ -409,7 +402,7 @@ static int parse_hotplug_slot_from_function_id(sd_device *dev, int slots_dirfd, 
 
         r = safe_atou64(attr, &function_id);
         if (r < 0)
-                return log_device_debug_errno(dev, r, "Failed to parse function_id, ignoring: %s", attr);
+                return log_device_debug_errno(dev, r, "Failed to parse function_id, ignoring: '%s'", attr);
 
         if (function_id <= 0 || function_id > UINT32_MAX)
                 return log_device_debug_errno(dev, SYNTHETIC_ERRNO(EINVAL),
@@ -421,7 +414,7 @@ static int parse_hotplug_slot_from_function_id(sd_device *dev, int slots_dirfd, 
                                               "PCI slot path is too long, ignoring.");
 
         if (faccessat(slots_dirfd, filename, F_OK, 0) < 0)
-                return log_device_debug_errno(dev, errno, "Cannot access %s under pci slots, ignoring: %m", filename);
+                return log_device_debug_errno(dev, errno, "Cannot access '%s' under pci slots, ignoring: %m", filename);
 
         *ret = (uint32_t) function_id;
         return 1; /* Found. We should ignore domain part. */
@@ -721,10 +714,11 @@ static int names_vio(UdevEvent *event, const char *prefix) {
 
         if (r != 8)
                 return log_device_debug_errno(dev, SYNTHETIC_ERRNO(EINVAL),
-                                              "VIO bus ID and slot ID have invalid length: %s", s);
+                                              "VIO bus ID and slot ID have invalid length: '%s'", s);
 
         if (!in_charset(s, HEXDIGITS))
-                return log_invalid_device_attr(dev, "VIO bus ID and slot ID", s);
+                return log_device_debug_errno(dev, SYNTHETIC_ERRNO(EINVAL),
+                                              "VIO bus ID and slot ID contain invalid characters: '%s'", s);
 
         /* Parse only slot ID (the last 4 hexdigits). */
         r = safe_atou_full(s + 4, 16, &slotid);
@@ -780,7 +774,8 @@ static int names_platform(UdevEvent *event, const char *prefix) {
                 return -EOPNOTSUPP;
 
         if (!in_charset(vendor, validchars))
-                return log_invalid_device_attr(dev, "platform vendor", vendor);
+                return log_device_debug_errno(dev, SYNTHETIC_ERRNO(EINVAL),
+                                              "Platform vendor contains invalid characters: '%s'", vendor);
 
         ascii_strlower(vendor);
 
@@ -890,14 +885,14 @@ static int names_devicetree_alias_prefix(UdevEvent *event, const char *prefix, c
                         r = safe_atou(alias_index, &i);
                         if (r < 0)
                                 return log_device_debug_errno(dev, r,
-                                                "Could not get index of alias %s: %m", alias);
+                                                "Could not get index of alias '%s': %m", alias);
                         conflict = alias_prefix;
                 }
 
                 /* ...but make sure we don't have an alias conflict */
                 if (i == 0 && device_get_sysattr_value_filtered(aliases_dev, conflict, NULL) >= 0)
                         return log_device_debug_errno(dev, SYNTHETIC_ERRNO(EEXIST),
-                                        "DeviceTree alias conflict: %s and %s both exist.",
+                                        "DeviceTree alias conflict: '%s' and '%s' both exist.",
                                         alias_prefix, alias_prefix_0);
 
                 char str[ALTIFNAMSIZ];
@@ -1133,7 +1128,7 @@ static int names_ccw(UdevEvent *event, const char *prefix) {
          */
         bus_id_len = strlen(bus_id);
         if (!IN_SET(bus_id_len, 8, 9))
-                return log_device_debug_errno(cdev, SYNTHETIC_ERRNO(EINVAL), "Invalid bus_id: %s", bus_id);
+                return log_device_debug_errno(cdev, SYNTHETIC_ERRNO(EINVAL), "Invalid bus_id: '%s'", bus_id);
 
         /* Strip leading zeros from the bus id for aesthetic purposes. This
          * keeps the ccw names stable, yet much shorter in general case of
@@ -1260,7 +1255,7 @@ static int names_netdevsim(UdevEvent *event, const char *prefix) {
                 return log_device_debug_errno(dev, SYNTHETIC_ERRNO(EOPNOTSUPP),
                                               "The 'phys_port_name' attribute is empty.");
         if (!utf8_is_valid(phys_port_name) || string_has_cc(phys_port_name, /* ok= */ NULL))
-                return log_invalid_device_attr(dev, "phys_port_name", phys_port_name);
+                return log_device_debug_errno(dev, SYNTHETIC_ERRNO(EINVAL), "Invalid phys_port_name");
 
         char str[ALTIFNAMSIZ];
         if (snprintf_ok(str, sizeof str, "%si%un%s", prefix, addr, phys_port_name))
@@ -1295,7 +1290,7 @@ static int names_xen(UdevEvent *event, const char *prefix) {
 
         p = startswith(vif, "vif-");
         if (!p)
-                return log_device_debug_errno(dev, SYNTHETIC_ERRNO(EINVAL), "Invalid vif name: %s.", vif);
+                return log_device_debug_errno(dev, SYNTHETIC_ERRNO(EINVAL), "Invalid vif name: '%s'.", vif);
 
         r = safe_atou_full(p, SAFE_ATO_REFUSE_PLUS_MINUS | SAFE_ATO_REFUSE_LEADING_ZERO |
                            SAFE_ATO_REFUSE_LEADING_WHITESPACE | 10, &id);

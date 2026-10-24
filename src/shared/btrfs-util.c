@@ -863,19 +863,6 @@ int btrfs_qgroup_unassign(int fd, uint64_t child, uint64_t parent) {
 }
 
 static int subvol_remove_children(int fd, const char *subvolume, uint64_t subvol_id, BtrfsRemoveFlags flags) {
-        struct btrfs_ioctl_search_args args = {
-                .key.tree_id = BTRFS_ROOT_TREE_OBJECTID,
-
-                .key.min_objectid = BTRFS_FIRST_FREE_OBJECTID,
-                .key.max_objectid = BTRFS_LAST_FREE_OBJECTID,
-
-                .key.min_type = BTRFS_ROOT_BACKREF_KEY,
-                .key.max_type = BTRFS_ROOT_BACKREF_KEY,
-
-                .key.min_transid = 0,
-                .key.max_transid = UINT64_MAX,
-        };
-
         struct btrfs_ioctl_vol_args vol_args = {};
         _cleanup_close_ int subvol_fd = -EBADF;
         struct stat st;
@@ -907,8 +894,9 @@ static int subvol_remove_children(int fd, const char *subvolume, uint64_t subvol
         if (r == 0) /* Not a btrfs subvolume */
                 return -ENOTTY;
 
-        /* Before we try anything, let's see if 'user_subvol_rm_allowed' is enabled and we can just remove
-         * the dir directly */
+        /* Before we try anything, attempt VFS rmdir(). For an empty subvolume btrfs_rmdir dispatches
+         * to btrfs_delete_subvolume; for the non-empty case it returns ENOTEMPTY and we fall through
+         * to the destroy ioctl below. */
         if (unlinkat(fd, subvolume, AT_REMOVEDIR) >= 0)
                 goto finish;
 
@@ -918,51 +906,63 @@ static int subvol_remove_children(int fd, const char *subvolume, uint64_t subvol
                         return r;
         }
 
-        /* First, try to remove the subvolume. If it happens to be
-         * already empty, this will just work. */
+        /* Try the destroy ioctl. Unlike unlinkat() above, this drops the entire subvolume tree, so
+         * regular files inside don't matter; it only returns ENOTEMPTY when there are nested
+         * subvolumes (BTRFS_ROOT_REF_KEY entries), which we then handle below. */
         strncpy(vol_args.name, subvolume, sizeof(vol_args.name)-1);
-        if (ioctl(fd, BTRFS_IOC_SNAP_DESTROY, &vol_args) >= 0)
-                goto finish;
-        if (!(flags & BTRFS_REMOVE_RECURSIVE) || errno != ENOTEMPTY)
-                return -errno;
+        int destroy_errno = 0;
+        for (;;) {
+                if (ioctl(fd, BTRFS_IOC_SNAP_DESTROY, &vol_args) >= 0)
+                        goto finish;
+                destroy_errno = errno;
 
-        /* OK, the subvolume is not empty, let's look for child
-         * subvolumes, and remove them, first */
-
-        args.key.min_offset = args.key.max_offset = subvol_id;
-
-        while (btrfs_ioctl_search_args_compare(&args) <= 0) {
-                struct btrfs_ioctl_search_header sh;
-                const void *body;
-
-                args.key.nr_items = 256;
-                if (ioctl(fd, BTRFS_IOC_TREE_SEARCH, &args) < 0)
-                        return -errno;
-
-                if (args.key.nr_items <= 0)
+                /* Without CAP_SYS_ADMIN the destroy ioctl is rejected for a read-only subvolume: with
+                 * EROFS when 'user_subvol_rm_allowed' is set (btrfs_permission() fails the inode
+                 * MAY_WRITE check), or with EPERM/EACCES when it is not (the privilege check fires
+                 * first). In either case, if the subvolume is read-only, clear the RDONLY flag (only
+                 * inode ownership is required) and retry. This lets the retry succeed when removal is
+                 * permitted, and otherwise leaves the subvolume writable so the caller (e.g. rm_rf())
+                 * can empty and rmdir() it without privileges. */
+                if (made_writable || !ERRNO_IS_FS_WRITE_REFUSED(destroy_errno))
                         break;
 
-                FOREACH_BTRFS_IOCTL_SEARCH_HEADER(sh, body, args) {
-                        _cleanup_free_ char *p = NULL;
+                r = btrfs_subvol_get_read_only_fd(subvol_fd);
+                if (r < 0)
+                        return r;
+                if (r == 0)
+                        break; /* Not read-only; clearing the flag would not help. */
 
-                        btrfs_ioctl_search_args_set(&args, &sh);
+                r = btrfs_subvol_set_read_only_fd(subvol_fd, false);
+                if (r < 0)
+                        return r;
+                made_writable = true;
+        }
+        if (!(flags & BTRFS_REMOVE_RECURSIVE) || destroy_errno != ENOTEMPTY)
+                return -destroy_errno;
 
-                        if (sh.type != BTRFS_ROOT_BACKREF_KEY)
-                                continue;
-                        if (sh.offset != subvol_id)
-                                continue;
+        /* OK, there are nested subvolumes — enumerate and recurse into them, then retry.
+         * BTRFS_IOC_GET_SUBVOL_ROOTREF and BTRFS_IOC_INO_LOOKUP_USER (kernel 4.18+) enumerate child
+         * subvolumes without requiring CAP_SYS_ADMIN in the initial user namespace, unlike the older
+         * BTRFS_IOC_TREE_SEARCH ioctl. */
 
-                        const struct btrfs_root_ref *ref = body;
-                        p = memdup_suffix0((char*) ref + sizeof(struct btrfs_root_ref), le64toh(ref->name_len));
-                        if (!p)
-                                return -ENOMEM;
+        struct btrfs_ioctl_get_subvol_rootref_args rootref_args = {};
 
-                        struct btrfs_ioctl_ino_lookup_args ino_args = {
-                                .treeid = subvol_id,
-                                .objectid = htole64(ref->dirid),
+        for (;;) {
+                /* BTRFS_IOC_GET_SUBVOL_ROOTREF returns up to BTRFS_MAX_ROOTREF_BUFFER_NUM entries per
+                 * call. If more are available, it returns -EOVERFLOW with num_items filled in and
+                 * min_treeid advanced so we can resume on the next iteration. */
+                int ioctl_ret = ioctl(subvol_fd, BTRFS_IOC_GET_SUBVOL_ROOTREF, &rootref_args);
+                if (ioctl_ret < 0 && errno != EOVERFLOW)
+                        return -errno;
+
+                for (uint8_t i = 0; i < rootref_args.num_items; i++) {
+                        uint64_t child_subvol_id = rootref_args.rootref[i].treeid;
+
+                        struct btrfs_ioctl_ino_lookup_user_args lookup_args = {
+                                .dirid = rootref_args.rootref[i].dirid,
+                                .treeid = child_subvol_id,
                         };
-
-                        if (ioctl(fd, BTRFS_IOC_INO_LOOKUP, &ino_args) < 0)
+                        if (ioctl(subvol_fd, BTRFS_IOC_INO_LOOKUP_USER, &lookup_args) < 0)
                                 return -errno;
 
                         if (!made_writable) {
@@ -973,29 +973,26 @@ static int subvol_remove_children(int fd, const char *subvolume, uint64_t subvol
                                 made_writable = true;
                         }
 
-                        if (isempty(ino_args.name))
-                                /* Subvolume is in the top-level
-                                 * directory of the subvolume. */
-                                r = subvol_remove_children(subvol_fd, p, sh.objectid, flags);
+                        if (isempty(lookup_args.path))
+                                /* Subvolume is in the top-level directory of the subvolume. */
+                                r = subvol_remove_children(subvol_fd, lookup_args.name, child_subvol_id, flags);
                         else {
                                 _cleanup_close_ int child_fd = -EBADF;
 
-                                /* Subvolume is somewhere further down,
-                                 * hence we need to open the
+                                /* Subvolume is somewhere further down, hence we need to open the
                                  * containing directory first */
 
-                                child_fd = openat(subvol_fd, ino_args.name, O_RDONLY|O_NOCTTY|O_CLOEXEC|O_DIRECTORY|O_NOFOLLOW);
+                                child_fd = openat(subvol_fd, lookup_args.path, O_RDONLY|O_NOCTTY|O_CLOEXEC|O_DIRECTORY|O_NOFOLLOW);
                                 if (child_fd < 0)
                                         return -errno;
 
-                                r = subvol_remove_children(child_fd, p, sh.objectid, flags);
+                                r = subvol_remove_children(child_fd, lookup_args.name, child_subvol_id, flags);
                         }
                         if (r < 0)
                                 return r;
                 }
 
-                /* Increase search key by one, to read the next item, if we can. */
-                if (!btrfs_ioctl_search_args_inc(&args))
+                if (ioctl_ret >= 0)
                         break;
         }
 
@@ -1226,19 +1223,6 @@ static int subvol_snapshot_children(
                 uint64_t old_subvol_id,
                 BtrfsSnapshotFlags flags) {
 
-        struct btrfs_ioctl_search_args args = {
-                .key.tree_id = BTRFS_ROOT_TREE_OBJECTID,
-
-                .key.min_objectid = BTRFS_FIRST_FREE_OBJECTID,
-                .key.max_objectid = BTRFS_LAST_FREE_OBJECTID,
-
-                .key.min_type = BTRFS_ROOT_BACKREF_KEY,
-                .key.max_type = BTRFS_ROOT_BACKREF_KEY,
-
-                .key.min_transid = 0,
-                .key.max_transid = UINT64_MAX,
-        };
-
         struct btrfs_ioctl_vol_args_v2 vol_args = {
                 .flags = flags & BTRFS_SNAPSHOT_READ_ONLY ? BTRFS_SUBVOL_RDONLY : 0,
                 .fd = old_fd,
@@ -1296,50 +1280,36 @@ static int subvol_snapshot_children(
                 return flags & BTRFS_SNAPSHOT_LOCK_BSD ? TAKE_FD(subvolume_fd) : 0;
         }
 
-        args.key.min_offset = args.key.max_offset = old_subvol_id;
+        /* Enumerate child subvolumes via BTRFS_IOC_GET_SUBVOL_ROOTREF + BTRFS_IOC_INO_LOOKUP_USER
+         * (kernel 4.18+), neither of which requires CAP_SYS_ADMIN, unlike BTRFS_IOC_TREE_SEARCH. */
 
-        while (btrfs_ioctl_search_args_compare(&args) <= 0) {
-                struct btrfs_ioctl_search_header sh;
-                const void *body;
+        struct btrfs_ioctl_get_subvol_rootref_args rootref_args = {};
 
-                args.key.nr_items = 256;
-                if (ioctl(old_fd, BTRFS_IOC_TREE_SEARCH, &args) < 0)
+        for (;;) {
+                /* BTRFS_IOC_GET_SUBVOL_ROOTREF returns up to BTRFS_MAX_ROOTREF_BUFFER_NUM entries per
+                 * call. If more are available, it returns -EOVERFLOW with num_items filled in and
+                 * min_treeid advanced so we can resume on the next iteration. */
+                int ioctl_ret = ioctl(old_fd, BTRFS_IOC_GET_SUBVOL_ROOTREF, &rootref_args);
+                if (ioctl_ret < 0 && errno != EOVERFLOW)
                         return -errno;
 
-                if (args.key.nr_items <= 0)
-                        break;
-
-                FOREACH_BTRFS_IOCTL_SEARCH_HEADER(sh, body, args) {
-                        _cleanup_free_ char *p = NULL, *c = NULL, *np = NULL;
+                for (uint8_t i = 0; i < rootref_args.num_items; i++) {
+                        _cleanup_free_ char *c = NULL, *np = NULL;
                         _cleanup_close_ int old_child_fd = -EBADF, new_child_fd = -EBADF;
-
-                        btrfs_ioctl_search_args_set(&args, &sh);
-
-                        if (sh.type != BTRFS_ROOT_BACKREF_KEY)
-                                continue;
-
-                        /* Avoid finding the source subvolume a second time */
-                        if (sh.offset != old_subvol_id)
-                                continue;
+                        uint64_t child_subvol_id = rootref_args.rootref[i].treeid;
 
                         /* Avoid running into loops if the new subvolume is below the old one. */
-                        if (sh.objectid == new_subvol_id)
+                        if (child_subvol_id == new_subvol_id)
                                 continue;
 
-                        const struct btrfs_root_ref *ref = body;
-                        p = memdup_suffix0((char*) ref + sizeof(struct btrfs_root_ref), le64toh(ref->name_len));
-                        if (!p)
-                                return -ENOMEM;
-
-                        struct btrfs_ioctl_ino_lookup_args ino_args = {
-                                .treeid = old_subvol_id,
-                                .objectid = htole64(ref->dirid),
+                        struct btrfs_ioctl_ino_lookup_user_args lookup_args = {
+                                .dirid = rootref_args.rootref[i].dirid,
+                                .treeid = child_subvol_id,
                         };
-
-                        if (ioctl(old_fd, BTRFS_IOC_INO_LOOKUP, &ino_args) < 0)
+                        if (ioctl(old_fd, BTRFS_IOC_INO_LOOKUP_USER, &lookup_args) < 0)
                                 return -errno;
 
-                        c = path_join(ino_args.name, p);
+                        c = path_join(lookup_args.path, lookup_args.name);
                         if (!c)
                                 return -ENOMEM;
 
@@ -1347,7 +1317,7 @@ static int subvol_snapshot_children(
                         if (old_child_fd < 0)
                                 return -errno;
 
-                        np = path_join(subvolume, ino_args.name);
+                        np = path_join(subvolume, lookup_args.path);
                         if (!np)
                                 return -ENOMEM;
 
@@ -1372,7 +1342,7 @@ static int subvol_snapshot_children(
 
                         /* When btrfs clones the subvolumes, child subvolumes appear as empty
                          * directories. Remove them, so that we can create a new snapshot in their place */
-                        if (unlinkat(new_child_fd, p, AT_REMOVEDIR) < 0) {
+                        if (unlinkat(new_child_fd, lookup_args.name, AT_REMOVEDIR) < 0) {
                                 int k = -errno;
 
                                 if (flags & BTRFS_SNAPSHOT_READ_ONLY)
@@ -1381,7 +1351,7 @@ static int subvol_snapshot_children(
                                 return k;
                         }
 
-                        r = subvol_snapshot_children(old_child_fd, new_child_fd, p, sh.objectid,
+                        r = subvol_snapshot_children(old_child_fd, new_child_fd, lookup_args.name, child_subvol_id,
                                                      flags & ~(BTRFS_SNAPSHOT_FALLBACK_COPY|BTRFS_SNAPSHOT_LOCK_BSD));
 
                         /* Restore the readonly flag */
@@ -1397,8 +1367,7 @@ static int subvol_snapshot_children(
                                 return r;
                 }
 
-                /* Increase search key by one, to read the next item, if we can. */
-                if (!btrfs_ioctl_search_args_inc(&args))
+                if (ioctl_ret >= 0)
                         break;
         }
 

@@ -251,7 +251,7 @@ int nsresource_add_cgroup(int userns_fd, int cgroup_fd) {
 
         cgroup_fd_idx = sd_varlink_push_dup_fd(vl, cgroup_fd);
         if (cgroup_fd_idx < 0)
-                return log_debug_errno(userns_fd_idx, "Failed to push cgroup fd into varlink connection: %m");
+                return log_debug_errno(cgroup_fd_idx, "Failed to push cgroup fd into varlink connection: %m");
 
         sd_json_variant *reply = NULL;
         r = sd_varlink_callbo(
@@ -352,6 +352,7 @@ int nsresource_add_netif_veth(
         static const sd_json_dispatch_field dispatch_table[] = {
                 { "hostInterfaceName",      SD_JSON_VARIANT_STRING, sd_json_dispatch_string, offsetof(InterfaceParams, host_interface_name),      SD_JSON_MANDATORY },
                 { "namespaceInterfaceName", SD_JSON_VARIANT_STRING, sd_json_dispatch_string, offsetof(InterfaceParams, namespace_interface_name), SD_JSON_MANDATORY },
+                {}
         };
 
         _cleanup_(interface_params_done) InterfaceParams p = {};
@@ -416,6 +417,7 @@ int nsresource_add_netif_tap(
         static const sd_json_dispatch_field dispatch_table[] = {
                 { "hostInterfaceName",       SD_JSON_VARIANT_STRING,        sd_json_dispatch_string, offsetof(InterfaceParams, host_interface_name), SD_JSON_MANDATORY },
                 { "interfaceFileDescriptor", _SD_JSON_VARIANT_TYPE_INVALID, sd_json_dispatch_uint,   offsetof(InterfaceParams, interface_fd_index),  SD_JSON_MANDATORY },
+                {}
         };
 
         _cleanup_(interface_params_done) InterfaceParams p = {};
