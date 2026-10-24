@@ -8,7 +8,6 @@
 #include "errno-util.h"
 #include "extract-word.h"
 #include "fd-util.h"
-#include "set.h"
 #include "string-util.h"
 #include "strv.h"
 #include "user-util.h"
@@ -81,9 +80,8 @@ int dlopen_libacl(void) {
                         DLSYM_ARG(acl_to_any_text));
 }
 
-int devnode_acl(int fd, const Set *uids) {
-        _cleanup_set_free_ Set *found = NULL;
-        bool changed = false;
+int devnode_acl(int fd, uid_t uid) {
+        bool changed = false, found = false;
         int r;
 
         assert(fd >= 0);
@@ -109,12 +107,12 @@ int devnode_acl(int fd, const Set *uids) {
                 if (tag != ACL_USER)
                         continue;
 
-                if (!set_isempty(uids)) {
+                if (uid > 0) {
                         uid_t *u = sym_acl_get_qualifier(entry);
                         if (!u)
                                 return -errno;
 
-                        if (set_contains(uids, UID_TO_PTR(*u))) {
+                        if (*u == uid) {
                                 acl_permset_t permset;
                                 if (sym_acl_get_permset(entry, &permset) < 0)
                                         return -errno;
@@ -134,10 +132,7 @@ int devnode_acl(int fd, const Set *uids) {
                                         changed = true;
                                 }
 
-                                r = set_ensure_put(&found, NULL, UID_TO_PTR(*u));
-                                if (r < 0)
-                                        return r;
-
+                                found = true;
                                 continue;
                         }
                 }
@@ -150,16 +145,7 @@ int devnode_acl(int fd, const Set *uids) {
         if (r < 0)
                 return -errno;
 
-        void *p;
-        SET_FOREACH(p, uids) {
-                uid_t uid = PTR_TO_UID(p);
-
-                if (uid == 0)
-                        continue;
-
-                if (set_contains(found, UID_TO_PTR(uid)))
-                        continue;
-
+        if (!found && uid > 0) {
                 if (sym_acl_create_entry(&acl, &entry) < 0)
                         return -errno;
 
