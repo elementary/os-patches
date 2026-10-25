@@ -243,6 +243,7 @@ int json_dispatch_path(const char *name, sd_json_variant *variant, sd_json_dispa
 int json_dispatch_strv_path(const char *name, sd_json_variant *variant, sd_json_dispatch_flags_t flags, void *userdata) {
         _cleanup_strv_free_ char **n = NULL;
         char ***l = ASSERT_PTR(userdata);
+        size_t s = 0;
         int r;
 
         assert(variant);
@@ -262,7 +263,7 @@ int json_dispatch_strv_path(const char *name, sd_json_variant *variant, sd_json_
                 if (r < 0)
                         return r;
 
-                r = strv_extend(&n, a);
+                r = strv_extend_with_size(&n, &s, a);
                 if (r < 0)
                         return json_log_oom(variant, flags);
         }
@@ -370,7 +371,7 @@ int json_variant_new_pidref(sd_json_variant **ret, PidRef *pidref) {
         return sd_json_buildo(
                         ret,
                         SD_JSON_BUILD_PAIR_INTEGER("pid", pidref->pid),
-                        SD_JSON_BUILD_PAIR_CONDITION(pidref->fd_id > 0, "pidfdId", SD_JSON_BUILD_INTEGER(pidref->fd_id)),
+                        SD_JSON_BUILD_PAIR_CONDITION(pidref->fd_id > 0, "pidfdId", SD_JSON_BUILD_UNSIGNED(pidref->fd_id)),
                         SD_JSON_BUILD_PAIR_CONDITION(!sd_id128_is_null(boot_id), "bootId", SD_JSON_BUILD_ID128(boot_id)));
 }
 
@@ -603,6 +604,9 @@ int json_dispatch_strv_environment(const char *name, sd_json_variant *variant, s
 
         if (!sd_json_variant_is_array(variant))
                 return json_log(variant, flags, SYNTHETIC_ERRNO(EINVAL), "JSON field '%s' is not an array.", strna(name));
+
+        if (sd_json_variant_elements(variant) > ENVIRONMENT_ASSIGNMENTS_MAX)
+                return json_log(variant, flags, SYNTHETIC_ERRNO(E2BIG), "Too many environment variable assignments.");
 
         sd_json_variant *i;
         JSON_VARIANT_ARRAY_FOREACH(i, variant) {

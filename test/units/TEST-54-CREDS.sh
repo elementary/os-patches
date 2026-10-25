@@ -17,7 +17,8 @@ run_with_cred_compare() (
     trap "rm -f '$log_file'" RETURN
 
     set -o pipefail
-    systemd-run -p SetCredential="$cred" --wait --pipe -- systemd-creds "$@" | tee "$log_file"
+    # This has been observed to get stuck under ASAN, so add a timeout as precaution
+    timeout 120 systemd-run -p SetCredential="$cred" --wait --pipe -- systemd-creds "$@" | tee "$log_file"
     diff "$log_file" <(echo -ne "$exp")
 )
 
@@ -167,6 +168,8 @@ systemd-creds --not-after="+1d" encrypt /tmp/cred.orig /tmp/cred.enc
 systemd-creds decrypt /tmp/cred.enc /tmp/cred.dec
 diff /tmp/cred.orig /tmp/cred.dec
 rm -f /tmp/cred.{enc,dec}
+ts="$(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+(! systemd-creds --with-key=null --timestamp="$ts" --not-after="$ts" encrypt /tmp/cred.orig /tmp/cred.enc)
 
 (! unshare -m bash -exc "mount -t tmpfs tmpfs /run/credentials && systemd-creds list")
 (! unshare -m bash -exc "mount -t tmpfs tmpfs /run/credentials && systemd-creds --system list")

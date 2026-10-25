@@ -1467,7 +1467,7 @@ static int manager_ratelimit_check_and_queue(Unit *u) {
         r = sd_event_add_time(
                         u->manager->event,
                         &u->auto_start_stop_event_source,
-                        CLOCK_MONOTONIC,
+                        CLOCK_BOOTTIME,
                         ratelimit_end(&u->auto_start_stop_ratelimit),
                         0,
                         manager_ratelimit_requeue,
@@ -1651,6 +1651,7 @@ static void manager_clear_jobs_and_units(Manager *m) {
         assert(!m->start_when_upheld_queue);
         assert(!m->stop_when_bound_queue);
         assert(!m->release_resources_queue);
+        assert(!m->stop_notify_queue);
 
         assert(hashmap_isempty(m->jobs));
         assert(hashmap_isempty(m->units));
@@ -2576,6 +2577,14 @@ static unsigned manager_dispatch_dbus_queue(Manager *m) {
         Job *j;
 
         assert(m);
+
+        /* If the API bus is connected but not fully set up yet (see bus_init_api()), postpone
+         * dispatching the queue, otherwise subscribers restored from a previous reexec would miss
+         * messages. The pending Varlink reload reply does not depend on the API bus, but it is held
+         * back too, so that the order between D-Bus messages and Varlink replies is preserved for
+         * clients that monitor both. */
+        if (m->api_bus && !m->api_bus_ready)
+                return 0;
 
         /* When we are reloading, let's not wait with generating signals, since we need to exit the manager as quickly
          * as we can. There's no point in throttling generation of signals in that case. */
@@ -3589,8 +3598,10 @@ int manager_override_watchdog_pretimeout_governor(Manager *m, const char *govern
 
 int manager_reload(Manager *m) {
         _unused_ _cleanup_(manager_reloading_stopp) Manager *reloading = NULL;
+        _cleanup_strv_free_ char **saved_subscribed_as_strv = NULL;
         _cleanup_fdset_free_ FDSet *fds = NULL;
         _cleanup_fclose_ FILE *f = NULL;
+        sd_id128_t saved_deserialized_bus_id;
         int r;
 
         assert(m);
@@ -3642,6 +3653,10 @@ int manager_reload(Manager *m) {
         manager_enumerate(m);
 
         /* Second, deserialize our stored data */
+        saved_subscribed_as_strv = TAKE_PTR(m->subscribed_as_strv);
+        saved_deserialized_bus_id = m->deserialized_bus_id;
+        m->deserialized_bus_id = SD_ID128_NULL;
+
         r = manager_deserialize(m, f, fds);
         if (r < 0)
                 log_warning_errno(r, "Deserialization failed, proceeding anyway: %m");
@@ -3655,10 +3670,12 @@ int manager_reload(Manager *m) {
         (void) manager_setup_handoff_timestamp_fd(m);
         (void) manager_setup_pidref_transport_fd(m);
 
-        /* Clean up deserialized bus track information. They're never consumed during reload (as opposed to
-         * reexec) since we do not disconnect from the bus. */
+        /* Discard the bus track information produced by this reload, since the bus stays connected. Preserve
+         * any validation state that was already pending before the reload, so its asynchronous GetId reply can
+         * still consume it when we return to the event loop. */
         m->subscribed_as_strv = strv_free(m->subscribed_as_strv);
-        m->deserialized_bus_id = SD_ID128_NULL;
+        m->subscribed_as_strv = TAKE_PTR(saved_subscribed_as_strv);
+        m->deserialized_bus_id = saved_deserialized_bus_id;
 
         /* Third, fire things up! */
         manager_coldplug(m);
@@ -4510,19 +4527,30 @@ fail:
 }
 
 void manager_set_first_boot(Manager *m, bool b) {
+        int r;
+
         assert(m);
 
         if (!MANAGER_IS_SYSTEM(m))
                 return;
 
         if (m->first_boot != (int) b) {
-                if (b)
-                        (void) touch("/run/systemd/first-boot");
-                else
-                        (void) unlink("/run/systemd/first-boot");
+                r = update_first_boot_file(b);
+                if (r < 0)
+                        log_warning_errno(r, "Failed to update the first-boot file, ignoring: %m");
         }
 
         m->first_boot = b;
+}
+
+int update_first_boot_file(bool b) {
+        if (b)
+                return touch("/run/systemd/first-boot");
+
+        if (unlink("/run/systemd/first-boot") < 0 && errno != ENOENT)
+                return -errno;
+
+        return 0;
 }
 
 void manager_disable_confirm_spawn(void) {
@@ -4966,6 +4994,7 @@ static int manager_dispatch_pidref_transport_fd(sd_event_source *source, int fd,
 
         if (n != sizeof(child_pid)) {
                 log_warning("Got pidref message of unexpected size %zi (expected %zu), ignoring.", n, sizeof(child_pid));
+                cmsg_close_all(&msghdr);
                 return 0;
         }
 
@@ -4984,6 +5013,8 @@ static int manager_dispatch_pidref_transport_fd(sd_event_source *source, int fd,
                         child_pidfd = *CMSG_TYPED_DATA(cmsg, int);
                 }
         }
+
+        /* From this point on, the fds are owned by our local variables. Call cmsg_close_all no more. */
 
         /* Verify and set parent pidref. */
         if (!ucred || !pid_is_valid(ucred->pid)) {

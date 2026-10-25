@@ -311,11 +311,11 @@
           <itemizedlist>
             <listitem><para>If set to <option>main</option> (the default), the service manager
             will consider the unit stopped when the main process, which is determined according to the
-            <varname>Type=</varname>, exits. Consequently, it cannot be used with
-            <varname>Type=</varname><option>oneshot</option>.</para></listitem>
+            <varname>Type=</varname>, exits.</para></listitem>
 
             <listitem><para>If set to <option>cgroup</option>, the service will be considered running as long as at
-            least one process in the cgroup has not exited.</para></listitem>
+            least one process in the cgroup has not exited. This option cannot be used with
+            <varname>Type=</varname><option>oneshot</option>.</para></listitem>
           </itemizedlist>
 
           <para>It is generally recommended to use <varname>ExitType=</varname><option>main</option> when a service has
@@ -462,6 +462,15 @@
         <varname>ExecCondition=</varname> command exits with 255 or abnormally (e.g. timeout, killed by a
         signal, etc.), the unit will be considered failed (and remaining commands will be skipped). Exit code of 0 or
         those matching <varname>SuccessExitStatus=</varname> will continue execution to the next commands.</para>
+
+        <para>Note that an <varname>ExecCondition=</varname> skip is <emphasis>not</emphasis> equivalent to a
+        unit-level <varname>Condition…=</varname> or <varname>Assert…=</varname> check failing. Because
+        <varname>ExecCondition=</varname> runs as part of the activation transition, a skip causes the unit to
+        transition from <constant>active</constant> to <constant>inactive</constant>, and consequently
+        <varname>SuccessAction=</varname> (see
+        <citerefentry><refentrytitle>systemd.unit</refentrytitle><manvolnum>5</manvolnum></citerefentry>) will be
+        honored. By contrast, <varname>Condition…=</varname> directives in the <literal>[Unit]</literal> section
+        prevent activation entirely and therefore do not trigger <varname>SuccessAction=</varname>.</para>
 
         <para>The same recommendations about not running long-running processes in <varname>ExecStartPre=</varname>
         also applies to <varname>ExecCondition=</varname>. <varname>ExecCondition=</varname> will also run the commands
@@ -1256,9 +1265,10 @@ RestartMaxDelaySec=160s</programlisting>
         file descriptor store is automatically released when the service is stopped; if
         <constant>restart</constant> (the default) it is kept around as long as the unit is neither inactive
         nor failed, or a job is queued for the service, or the service is expected to be restarted. If
-        <constant>yes</constant> the file descriptor store is kept around until the unit is removed from
-        memory (i.e. is not referenced anymore and inactive). The latter is useful to keep entries in the
-        file descriptor store pinned until the service manager exits.</para>
+        <constant>yes</constant> the file descriptor store is kept around and garbage collection of the unit
+        is disabled. The latter is useful to keep entries in the file descriptor store pinned until the unit
+        is removed, the service manager exits, or the file descriptors get <constant>EPOLLHUP</constant> or
+        <constant>EPOLLERR</constant>.</para>
 
         <para>Use <command>systemctl clean --what=fdstore …</command> to release the file descriptor store
         explicitly.</para>
@@ -1513,7 +1523,7 @@ ExecStart=/bin/echo ${ONE} ${TWO} ${THREE}
 ExecStart=/bin/echo $ONE $TWO $THREE</programlisting>
     <para>This results in <filename>/bin/echo</filename> being
     called twice, the first time with arguments
-    <literal>'one'</literal>,
+    <literal>one</literal>,
     <literal>'two two' too</literal>, <literal></literal>,
     and the second time with arguments
     <literal>one</literal>, <literal>two two</literal>,

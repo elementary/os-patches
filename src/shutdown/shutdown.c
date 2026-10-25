@@ -285,14 +285,30 @@ static void init_watchdog(void) {
         const char *s;
         int r;
 
-        s = getenv("WATCHDOG_DEVICE");
+        /* NB: we do not insist on $WATCHDOG_PID being set because old systemd versions didn't set it at all,
+         * and we want to retain some basic compatibility between an old service manager and a new shutdown
+         * binary. If it *is* set we'll insist on it being set to 1 however. */
+        s = secure_getenv("WATCHDOG_PID");
+        if (s) {
+                pid_t pid;
+
+                r = parse_pid(s, &pid);
+                if (r < 0)
+                        log_warning_errno(r, "Failed to parse $WATCHDOG_PID, ignoring: %s", s);
+                else if (pid != getpid_cached()) {
+                        log_warning("$WATCHDOG_PID set, but not to " PID_FMT ", skipping watchdog logic.", getpid_cached());
+                        return;
+                }
+        }
+
+        s = secure_getenv("WATCHDOG_DEVICE");
         if (s) {
                 r = watchdog_set_device(s);
                 if (r < 0)
-                        log_warning_errno(r, "Failed to set watchdog device to %s, ignoring: %m", s);
+                        log_warning_errno(r, "Failed to set watchdog device to '%s', ignoring: %m", s);
         }
 
-        s = getenv("WATCHDOG_USEC");
+        s = secure_getenv("WATCHDOG_USEC");
         if (s) {
                 usec_t usec;
 

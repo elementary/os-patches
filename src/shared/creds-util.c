@@ -605,6 +605,8 @@ int get_credential_host_secret(CredentialSecretFlags flags, struct iovec *ret) {
                 /* Hmm, this secret is from somewhere else. Let's delete the file. Let's first acquire a lock
                  * to ensure we are the only ones accessing the file while we delete it. */
 
+                log_notice("'%s/%s' comes from a different machine ID, deleting.", dirname, filename);
+
                 if (flock(fd, LOCK_EX) < 0)
                         return log_debug_errno(errno,
                                                "Failed to flock %s/%s: %m", dirname, filename);
@@ -840,14 +842,16 @@ int encrypt_credential_and_warn(
         /* Only one of these two flags may be set at the same time */
         assert(!FLAGS_SET(flags, CREDENTIAL_ALLOW_NULL) || !FLAGS_SET(flags, CREDENTIAL_REFUSE_NULL));
 
+        CLEANUP_ERASE(md);
+
         if (!CRED_KEY_IS_VALID(with_key) && !CRED_KEY_IS_AUTO(with_key))
                 return log_error_errno(SYNTHETIC_ERRNO(EINVAL), "Invalid key type: " SD_ID128_FORMAT_STR, SD_ID128_FORMAT_VAL(with_key));
 
         if (name && !credential_name_valid(name))
                 return log_error_errno(SYNTHETIC_ERRNO(EINVAL), "Invalid credential name: %s", name);
 
-        if (not_after != USEC_INFINITY && timestamp != USEC_INFINITY && not_after < timestamp)
-                return log_error_errno(SYNTHETIC_ERRNO(EINVAL), "Credential is invalidated before it is valid (" USEC_FMT " < " USEC_FMT ").", not_after, timestamp);
+        if (not_after != USEC_INFINITY && timestamp != USEC_INFINITY && not_after <= timestamp)
+                return log_error_errno(SYNTHETIC_ERRNO(EINVAL), "Credential is invalidated before or when it becomes valid (" USEC_FMT " <= " USEC_FMT ").", not_after, timestamp);
 
         if (DEBUG_LOGGING) {
                 char buf[FORMAT_TIMESTAMP_MAX];
@@ -899,7 +903,10 @@ int encrypt_credential_and_warn(
                 try_tpm2 = CRED_KEY_REQUIRES_TPM2(with_key);
 
         if (try_tpm2) {
-                if (CRED_KEY_WANTS_TPM2_PK(with_key) || CRED_KEY_REQUIRES_TPM2_PK(with_key)) {
+                /* If the firmware does not support TPMs, then UKI measurements are not going to work, hence
+                 * PCR 11 public key stuff cannot work. Because of that, if PK is only wanted (but not
+                 * required) we won't try it. */
+                if ((CRED_KEY_WANTS_TPM2_PK(with_key) && tpm2_is_fully_supported()) || CRED_KEY_REQUIRES_TPM2_PK(with_key)) {
 
                         /* Load public key for PCR policies, if one is specified, or explicitly requested */
 
@@ -923,6 +930,8 @@ int encrypt_credential_and_warn(
                 r = tpm2_get_best_pcr_bank(tpm2_context, tpm2_hash_pcr_mask | tpm2_pubkey_pcr_mask, &tpm2_pcr_bank);
                 if (r < 0)
                         return log_error_errno(r, "Could not find best pcr bank: %m");
+
+                log_debug("Selected literal PCR mask: 0x%x, PK PCR mask: 0x%x", tpm2_hash_pcr_mask, tpm2_pubkey_pcr_mask);
 
                 TPML_PCR_SELECTION tpm2_hash_pcr_selection;
                 tpm2_tpml_pcr_selection_from_mask(tpm2_hash_pcr_mask, tpm2_pcr_bank, &tpm2_hash_pcr_selection);
@@ -972,16 +981,16 @@ int encrypt_credential_and_warn(
                                 return log_error_errno(r, "Failed to seal to TPM2: %m");
 
                         log_notice_errno(r, "TPM2 sealing didn't work, continuing without TPM2: %m");
+                } else {
+                        if (!iovec_memdup(&IOVEC_MAKE(tpm2_policy.buffer, tpm2_policy.size), &tpm2_policy_hash))
+                                return log_oom();
+
+                        assert(n_blobs == 1);
+                        tpm2_blob = TAKE_STRUCT(blobs[0]);
+
+                        assert(tpm2_blob.iov_len <= CREDENTIAL_FIELD_SIZE_MAX);
+                        assert(tpm2_policy_hash.iov_len <= CREDENTIAL_FIELD_SIZE_MAX);
                 }
-
-                if (!iovec_memdup(&IOVEC_MAKE(tpm2_policy.buffer, tpm2_policy.size), &tpm2_policy_hash))
-                        return log_oom();
-
-                assert(n_blobs == 1);
-                tpm2_blob = TAKE_STRUCT(blobs[0]);
-
-                assert(tpm2_blob.iov_len <= CREDENTIAL_FIELD_SIZE_MAX);
-                assert(tpm2_policy_hash.iov_len <= CREDENTIAL_FIELD_SIZE_MAX);
         }
 #endif
 
@@ -1204,6 +1213,8 @@ int decrypt_credential_and_warn(
         /* Only one of these two flags may be set at the same time */
         assert(!FLAGS_SET(flags, CREDENTIAL_ALLOW_NULL) || !FLAGS_SET(flags, CREDENTIAL_REFUSE_NULL));
 
+        CLEANUP_ERASE(md);
+
         /* Relevant error codes:
          *
          *   -EBADMSG      → Corrupted file
@@ -1373,8 +1384,10 @@ int decrypt_credential_and_warn(
                                 &tpm2_key);
                 if (r == -EREMOTE)
                         return log_error_errno(r, "TPM key integrity check failed. Key most likely does not belong to this TPM.");
+                if (r == -EADDRNOTAVAIL)
+                        return log_error_errno(r, "NV index referenced by key is missing, unwritten, or unusable, it could be for another system.");
                 if (ERRNO_IS_NEG_TPM2_UNSEAL_BAD_PCR(r))
-                        return log_error_errno(r, "TPM policy does not match current system state. Either system has been tempered with or policy out-of-date: %m");
+                        return log_error_errno(r, "TPM policy does not match current system state. Either system has been tampered with or policy out-of-date: %m");
                 if (r < 0)
                         return log_error_errno(r, "Failed to unseal secret using TPM2: %m");
 #else
@@ -1407,7 +1420,9 @@ int decrypt_credential_and_warn(
         if (sd_id128_equal(h->id, CRED_AES256_GCM_BY_NULL) && !FLAGS_SET(flags, CREDENTIAL_ALLOW_NULL))
                 log_warning("Warning: using a null key for decryption and authentication. Confidentiality or authenticity are not provided.");
 
-        sha256_hash_host_and_tpm2_key(&host_key, &tpm2_key, md);
+        r = sha256_hash_host_and_tpm2_key(&host_key, &tpm2_key, md);
+        if (r < 0)
+                return r;
 
         if (CRED_KEY_IS_SCOPED(h->id)) {
                 r = mangle_uid_into_key(uid, md);
@@ -1823,6 +1838,7 @@ static const CredentialsVarlinkError credentials_varlink_error_table[] = {
         { "io.systemd.Credentials.KeyBelongsToOtherTPM",   EREMOTE,      "The TPM integrity check for this key failed, key probably belongs to another TPM, or was corrupted." },
         { "io.systemd.Credentials.TPMInDictionaryLockout", ENOLCK,       "The TPM is in dictionary lockout mode, cannot operate." },
         { "io.systemd.Credentials.UnexpectedPCRState" ,    EUCLEAN,      "Unexpected TPM PCR state of the system." },
+        { "io.systemd.Credentials.NVIndexUnusable",        EADDRNOTAVAIL, "The NV index referenced by the key is missing, unwritten, or unusable, it could be for another system." },
 };
 
 const CredentialsVarlinkError* credentials_varlink_error_by_id(const char *id) {

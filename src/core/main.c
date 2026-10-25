@@ -524,8 +524,10 @@ static int parse_proc_cmdline_item(const char *key, const char *value, void *dat
                         return 0;
 
                 r = unbase64mem(value, &p, &sz);
-                if (r < 0)
+                if (r < 0) {
                         log_warning_errno(r, "Failed to parse systemd.random_seed= argument, ignoring: %s", value);
+                        return 0;
+                }
 
                 free(arg_random_seed);
                 arg_random_seed = sz > 0 ? p : mfree(p);
@@ -1965,7 +1967,7 @@ static int do_reexecute(
                 char* argv[],
                 const struct rlimit *saved_rlimit_nofile,
                 const struct rlimit *saved_rlimit_memlock,
-                FDSet *fds,
+                FDSet *_fds, /* donated */
                 const char *switch_root_dir,
                 const char *switch_root_init,
                 uint64_t saved_capability_ambient_set,
@@ -1980,6 +1982,9 @@ static int do_reexecute(
         assert(saved_rlimit_nofile);
         assert(saved_rlimit_memlock);
         assert(ret_error_message);
+
+        /* The fdset is donated to us, take ownership so it is freed on all exit paths. */
+        _cleanup_fdset_free_ FDSet *fds = TAKE_PTR(_fds);
 
         /* Close and disarm the watchdog, so that the new instance can reinitialize it, but the machine
          * doesn't get rebooted while we do that. */
@@ -2382,6 +2387,11 @@ static void log_execution_mode(bool *ret_first_boot) {
                                         log_debug("Detected initialized system, this is not the first boot.");
                         }
                 }
+
+                /* Make the first-boot file visible now: the credential import
+                 * consults in_first_boot() for systemd.credentials_boot_policy= which runs
+                 * before the manager object is created. */
+                (void) update_first_boot_file(first_boot);
 
                 assert_se(uname(&uts) >= 0);
 
@@ -3418,7 +3428,7 @@ finish:
                                  argc, argv,
                                  &saved_rlimit_nofile,
                                  &saved_rlimit_memlock,
-                                 fds,
+                                 TAKE_PTR(fds),
                                  switch_root_dir,
                                  switch_root_init,
                                  saved_ambient_set,

@@ -163,6 +163,7 @@ simple_tests += files(
         'test-path-util.c',
         'test-percent-util.c',
         'test-pidref.c',
+        'test-plymouth-util.c',
         'test-pretty-print.c',
         'test-printf.c',
         'test-prioq.c',
@@ -254,11 +255,6 @@ executables += [
         },
         test_template + {
                 'sources' : files('test-btrfs.c'),
-                'type' : 'manual',
-        },
-        test_template + {
-                'sources' : files('test-btrfs-physical-offset.c'),
-                'type' : 'manual',
         },
         test_template + {
                 'sources' : files('test-chase-manual.c'),
@@ -403,6 +399,10 @@ executables += [
                 'sources' : files('test-openssl.c'),
                 'dependencies' : libopenssl,
                 'conditions' : ['HAVE_OPENSSL'],
+        },
+        test_template + {
+                'sources' : files('test-pe-binary.c'),
+                'dependencies' : libopenssl,
         },
         test_template + {
                 'sources' : files('test-parse-util.c'),
@@ -555,6 +555,7 @@ executables += [
         core_test_template + {
                 'sources' : files('test-execute.c'),
                 'dependencies' : common_test_dependencies,
+                'type' : meson.is_cross_build() ? 'manual' : '',
                 'timeout' : 360,
         },
         core_test_template + {
@@ -570,7 +571,7 @@ executables += [
                 'dependencies' : common_test_dependencies,
         },
         core_test_template + {
-                'sources' : files('test-loop-block.c'),
+                'sources' : files('test-loop-util.c'),
                 'dependencies' : [threads],
                 'parallel' : false,
         },

@@ -218,10 +218,13 @@ static int build_accept_encoding(char **ret) {
         return 0;
 }
 
-static int request_meta(void **connection_cls, int fd, char *hostname) {
+static int request_meta(void **connection_cls, int fd, char *_hostname) {
         int r;
 
         assert(connection_cls);
+
+        /* This takes ownership of the hostname in all cases, including on failure. */
+        _cleanup_free_ char *hostname = TAKE_PTR(_hostname);
 
         if (*connection_cls)
                 return 0; /* already assigned. */
@@ -229,10 +232,9 @@ static int request_meta(void **connection_cls, int fd, char *hostname) {
         Writer *writer;
         r = journal_remote_get_writer(journal_remote_server_global, hostname, &writer);
         if (r < 0)
-                return log_warning_errno(r, "Failed to get writer for source %s: %m",
-                                         hostname);
+                return log_warning_errno(r, "Failed to get writer for source %s: %m", hostname);
 
-        _cleanup_(source_freep) RemoteSource *source = source_new(fd, true, hostname, writer);
+        _cleanup_(source_freep) RemoteSource *source = source_new(fd, true, TAKE_PTR(hostname), writer);
         if (!source)
                 return log_oom();
 
@@ -285,7 +287,7 @@ static int process_http_upload(
                         _cleanup_free_ char *buf = NULL;
                         size_t buf_size;
 
-                        r = decompress_blob(source->compression, upload_data, *upload_data_size, (void **) &buf, &buf_size, 0);
+                        r = decompress_blob(source->compression, upload_data, *upload_data_size, (void **) &buf, &buf_size, DATA_SIZE_MAX);
                         if (r < 0)
                                 return mhd_respondf(connection, r, MHD_HTTP_BAD_REQUEST, "Decompression of received blob failed.");
 
@@ -442,13 +444,12 @@ static mhd_result request_handler(
 
         assert(hostname);
 
-        r = request_meta(connection_cls, fd, hostname);
+        r = request_meta(connection_cls, fd, TAKE_PTR(hostname));
         if (r == -ENOMEM)
                 return respond_oom(connection);
         else if (r < 0)
                 return mhd_respondf(connection, r, MHD_HTTP_INTERNAL_SERVER_ERROR, "%m");
 
-        hostname = NULL;
         return MHD_YES;
 }
 
@@ -520,8 +521,9 @@ static int setup_microhttpd_server(RemoteServer *s,
         d = new(MHDDaemonWrapper, 1);
         if (!d)
                 return log_oom();
-
-        d->fd = (uint64_t) fd;
+        *d = (MHDDaemonWrapper) {
+                .fd = (uint64_t) fd,
+        };
 
         d->daemon = MHD_start_daemon(flags, 0,
                                      NULL, NULL,

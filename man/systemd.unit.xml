@@ -281,6 +281,16 @@
     generally ignored. This includes names that start with a <literal>.</literal> or
     end with a <literal>.ignore</literal>.</para>
 
+    <para>When unit aliasing is introduced during reload/reexec (e.g., converting
+    <filename>b.service</filename> to a symlink pointing to <filename>a.service</filename>), the running
+    state of the canonical unit (<filename>a.service</filename>) is preserved. The old serialized state
+    of the now-aliased unit is migrated to a new stub orphaned unit to prevent stale data from
+    corrupting the canonical unit's live state. Dependencies referencing the alias name are automatically
+    resolved to the canonical unit, and the dependency graph is rebuilt from unit files, ensuring
+    consistency. If the now-aliased unit had resources such as running processes, they will now be tracked
+    under the new orphaned unit. Once all resources are gone (e.g. all processes have exited) the orphaned
+    unit will be garbage collected automatically.</para>
+
     <para>The unit file format is covered by the
     <ulink url="https://systemd.io/PORTABILITY_AND_STABILITY/">Interface
     Portability and Stability Promise</ulink>.</para>
@@ -1079,6 +1089,11 @@
         resources, …) are flushed out immediately after the unit completed, except for what is stored in the logging
         subsystem. Defaults to <option>inactive</option>.</para>
 
+        <para>Since v261, if <varname>FileDescriptorStorePreserve=</varname> is set to <option>yes</option>,
+        and the unit has file descriptors stored, garbage collection will be disabled until the unit is
+        removed, the service manager exits, or the file descriptors get <constant>EPOLLHUP</constant> or
+        <constant>EPOLLERR</constant>.</para>
+
         <xi:include href="version-info.xml" xpointer="v236"/>
         </listitem>
       </varlistentry>
@@ -1097,6 +1112,16 @@
         allowed. In user mode, only <option>none</option>, <option>exit</option>, and
         <option>exit-force</option> are allowed. Both options default to <option>none</option>.</para>
 
+        <para>These actions are tied to the unit's state transitions and fire only when the unit actually
+        transitions out of an <constant>active</constant> or <constant>activating</constant> state. As a
+        consequence, <varname>Condition…=</varname> and <varname>Assert…=</varname> directives that fail do
+        <emphasis>not</emphasis> trigger <varname>SuccessAction=</varname> or
+        <varname>FailureAction=</varname>: they prevent activation in the first place, so no state transition
+        occurs. By contrast, the <varname>ExecCondition=</varname> directive in
+        <citerefentry><refentrytitle>systemd.service</refentrytitle><manvolnum>5</manvolnum></citerefentry>
+        runs as part of activation, so an <varname>ExecCondition=</varname> skip <emphasis>will</emphasis>
+        trigger <varname>SuccessAction=</varname>.</para>
+
         <para>If <option>none</option> is set, no action will be triggered. <option>reboot</option> causes a
         reboot following the normal shutdown procedure (i.e. equivalent to <command>systemctl
         reboot</command>).  <option>reboot-force</option> causes a forced reboot which will terminate all
@@ -1112,7 +1137,9 @@
         semantics. <option>exit</option> causes the manager to exit following the normal shutdown procedure,
         and <option>exit-force</option> causes it terminate without shutting down services. When
         <option>exit</option> or <option>exit-force</option> is used by default the exit status of the main
-        process of the unit (if this applies) is returned from the service manager. However, this may be
+        process of the unit (if this applies) is returned from the service manager. If there is no such
+        status, <varname>FailureAction=</varname> returns 255 instead, while
+        <varname>SuccessAction=</varname> leaves the exit status unchanged. However, this may be
         overridden with
         <varname>FailureActionExitStatus=</varname>/<varname>SuccessActionExitStatus=</varname>, see below.
         <option>soft-reboot</option> will trigger a userspace reboot operation.

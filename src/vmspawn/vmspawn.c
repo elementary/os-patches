@@ -2536,15 +2536,15 @@ static int run_virtual_machine(int kvm_device_fd, int vhost_device_fd) {
                                 return log_error_errno(r, "Failed to start tpm: %m");
 
                         log_debug_errno(r, "Failed to start tpm, ignoring: %m");
+                } else {
+                        _cleanup_(sd_event_source_unrefp) sd_event_source *source = NULL;
+                        r = event_add_child_pidref(event, &source, &child, WEXITED, on_child_exit, /* userdata= */ NULL);
+                        if (r < 0)
+                                return r;
+
+                        pidref_done(&child);
+                        children[n_children++] = TAKE_PTR(source);
                 }
-
-                _cleanup_(sd_event_source_unrefp) sd_event_source *source = NULL;
-                r = event_add_child_pidref(event, &source, &child, WEXITED, on_child_exit, /* userdata= */ NULL);
-                if (r < 0)
-                        return r;
-
-                pidref_done(&child);
-                children[n_children++] = TAKE_PTR(source);
         }
 
         if (tpm_socket_address) {
@@ -2944,12 +2944,23 @@ static int determine_names(void) {
                         if (r < 0)
                                 return log_error_errno(r, "Failed to find image for machine '%s': %m", arg_machine);
 
-                        if (IN_SET(i->type, IMAGE_RAW, IMAGE_BLOCK))
+                        switch (i->type) {
+                        case IMAGE_RAW:
+                        case IMAGE_BLOCK:
                                 r = free_and_strdup(&arg_image, i->path);
-                        else if (IN_SET(i->type, IMAGE_DIRECTORY, IMAGE_SUBVOLUME))
+                                break;
+
+                        case IMAGE_DIRECTORY:
+                        case IMAGE_SUBVOLUME:
                                 r = free_and_strdup(&arg_directory, i->path);
-                        else
-                                assert_not_reached();
+                                break;
+
+                        default:
+                                return log_error_errno(SYNTHETIC_ERRNO(EOPNOTSUPP),
+                                                       "Image '%s' at '%s' has unsupported type '%s'. "
+                                                       "Please use 'systemd-nspawn -M %s' instead.",
+                                                       arg_machine, i->path, image_type_to_string(i->type), arg_machine);
+                        }
                         if (r < 0)
                                 return log_oom();
                 } else {

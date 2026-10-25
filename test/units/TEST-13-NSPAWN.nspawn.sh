@@ -402,11 +402,17 @@ testcase_check_default_inaccessible_paths() {
     # Taken from src/nspawn/nspawn-mount.c:mount_all()
     inaccessible_paths=(
         "/proc/kallsyms"
-        "/proc/kcore"
         "/proc/keys"
         "/proc/sysrq-trigger"
         "/proc/timer_list"
     )
+
+    # /proc/kcore may not exist on some kernels, e.g. Alpine/postmarketOS.
+    if [[ -e /proc/kcore ]]; then
+        inaccessible_paths+=(
+            "/proc/kcore"
+        )
+    fi
 
     root="$(mktemp -d /var/lib/machines/TEST-13-NSPAWN.default_inaccessible_paths.XXX)"
     container="$(basename "$root")"
@@ -575,7 +581,7 @@ ip link | grep wl-renamed1
 EOF
     fi
 
-    timeout 30 systemd-nspawn --directory="$root"
+    timeout --foreground 30 systemd-nspawn --directory="$root"
 
     # And now for stuff that needs to run separately
     #
@@ -1187,6 +1193,26 @@ matrix_run_one() {
     return 0
 }
 
+testcase_ping_group_range() {
+    local range root
+
+    if [[ "$IS_USERNS_SUPPORTED" == "no" ]]; then
+        echo "Skipping user namespace test..."
+        return 0
+    fi
+
+    root="$(mktemp -d /var/lib/machines/TEST-13-NSPAWN.ping-group-range.XXX)"
+    create_dummy_container "$root"
+    trap 'rm -fr "$root"' RETURN ERR
+
+    range="$(systemd-nspawn --pipe --register=no \
+                            --directory="$root" \
+                            --private-network \
+                            --private-users=pick \
+                            cat /proc/sys/net/ipv4/ping_group_range)"
+    assert_eq "${range//[[:space:]]/ }" "0 65535"
+}
+
 testcase_api_vfs() {
     local api_vfs_writable
 
@@ -1347,7 +1373,10 @@ testcase_unpriv() {
 }
 
 testcase_fuse() {
-    if [[ "$(cat <>/dev/fuse 2>&1)" != 'cat: -: Operation not permitted' ]]; then
+    # On some kernels reading from /dev/fuse without an attached connection blocks indefinitely
+    # rather than returning EPERM, so guard the probe with a short timeout and skip the test
+    # whenever we don't get the expected error string.
+    if [[ "$(timeout --foreground 5 cat <>/dev/fuse 2>&1)" != 'cat: -: Operation not permitted' ]]; then
         echo "FUSE is not supported, skipping the test..."
         return 0
     fi
@@ -1378,7 +1407,7 @@ testcase_fuse() {
     #    "cat: -: Operation not permitted"                   # pass the test; opened but not read
     #    "bash: line 1: /dev/fuse: Operation not permitted"  # fail the test; could not open
     #    ""                                                  # fail the test; reading worked
-    [[ "$(systemd-nspawn --register=no --pipe --directory="$root" \
+    [[ "$(timeout --foreground 30 systemd-nspawn --register=no --pipe --directory="$root" \
               bash -c 'cat <>/dev/fuse' 2>&1)" == 'cat: -: Operation not permitted' ]]
 
     rm -fr "$root"
@@ -1387,7 +1416,7 @@ testcase_fuse() {
 testcase_unpriv_fuse() {
     # Same as above, but for unprivileged operation.
 
-    if [[ "$(cat <>/dev/fuse 2>&1)" != 'cat: -: Operation not permitted' ]]; then
+    if [[ "$(timeout --foreground 5 cat <>/dev/fuse 2>&1)" != 'cat: -: Operation not permitted' ]]; then
         echo "FUSE is not supported, skipping the test..."
         return 0
     fi
@@ -1406,7 +1435,7 @@ testcase_unpriv_fuse() {
     create_dummy_ddi "$tmpdir" "$name"
     chown --recursive testuser: "$tmpdir"
 
-    [[ "$(run0 -u testuser --pipe systemd-run \
+    [[ "$(timeout --foreground 60 run0 -u testuser --pipe systemd-run \
               --user \
               --pipe \
               --property=Delegate=yes \
@@ -1498,7 +1527,7 @@ testcase_link_journal_host() {
     root="$(mktemp -d /var/lib/machines/TEST-13-NSPAWN.link-journal.XXX)"
     create_dummy_container "$root"
 
-    systemd-id128 new > "$root"/etc/machine-id
+    systemd-id128 new >"$root"/etc/machine-id
 
     hoge="/var/log/journal/$(cat "$root"/etc/machine-id)/"
     mkdir -p "$hoge"

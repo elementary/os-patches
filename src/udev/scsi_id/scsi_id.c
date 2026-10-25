@@ -15,6 +15,7 @@
 #include "extract-word.h"
 #include "fd-util.h"
 #include "fileio.h"
+#include "parse-util.h"
 #include "scsi_id.h"
 #include "string-util.h"
 #include "strv.h"
@@ -234,7 +235,7 @@ static void help(void) {
 
 static int set_options(int argc, char **argv,
                        char *maj_min_dev) {
-        int option;
+        int option, r;
 
         /*
          * optind is a global extern used by getopt. Since we can call
@@ -279,7 +280,11 @@ static int set_options(int argc, char **argv,
                         break;
 
                 case 's':
-                        sg_version = atoi(optarg);
+                        r = safe_atoi(optarg, &sg_version);
+                        if (r < 0)
+                                return log_error_errno(r,
+                                                       "Invalid SG version '%s'",
+                                                       optarg);
                         if (sg_version < 3 || sg_version > 4)
                                 return log_error_errno(SYNTHETIC_ERRNO(EINVAL),
                                                        "Unknown SG version '%s'",
@@ -389,6 +394,10 @@ static int set_inq_values(struct scsi_id_device *dev_scsi, const char *path) {
         return 0;
 }
 
+static bool scsi_string_is_valid(const char *s) {
+        return !isempty(s) && utf8_is_valid(s) && !string_has_cc(s, /* ok= */ NULL);
+}
+
 /*
  * scsi_id: try to get an id, if one is found, printf it to stdout.
  * returns a value passed to exit() - 0 if printed an id, else 1.
@@ -432,17 +441,17 @@ static int scsi_id(char *maj_min_dev) {
                         udev_replace_chars(serial_str, NULL);
                         printf("ID_SERIAL_SHORT=%s\n", serial_str);
                 }
-                if (dev_scsi.wwn[0] != '\0') {
+                if (scsi_string_is_valid(dev_scsi.wwn)) {
                         printf("ID_WWN=0x%s\n", dev_scsi.wwn);
-                        if (dev_scsi.wwn_vendor_extension[0] != '\0') {
+                        if (scsi_string_is_valid(dev_scsi.wwn_vendor_extension)) {
                                 printf("ID_WWN_VENDOR_EXTENSION=0x%s\n", dev_scsi.wwn_vendor_extension);
                                 printf("ID_WWN_WITH_EXTENSION=0x%s%s\n", dev_scsi.wwn, dev_scsi.wwn_vendor_extension);
                         } else
                                 printf("ID_WWN_WITH_EXTENSION=0x%s\n", dev_scsi.wwn);
                 }
-                if (dev_scsi.tgpt_group[0] != '\0')
+                if (scsi_string_is_valid(dev_scsi.tgpt_group))
                         printf("ID_TARGET_PORT=%s\n", dev_scsi.tgpt_group);
-                if (dev_scsi.unit_serial_number[0] != '\0' && utf8_is_valid(dev_scsi.unit_serial_number) && !string_has_cc(dev_scsi.unit_serial_number, /* ok= */ NULL))
+                if (scsi_string_is_valid(dev_scsi.unit_serial_number))
                         printf("ID_SCSI_SERIAL=%s\n", dev_scsi.unit_serial_number);
                 goto out;
         }

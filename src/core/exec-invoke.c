@@ -969,7 +969,7 @@ static int get_supplementary_groups(
          * be positive, otherwise fail.
          */
         errno = 0;
-        int ngroups_max = (int) sysconf(_SC_NGROUPS_MAX);
+        long ngroups_max = sysconf(_SC_NGROUPS_MAX);
         if (ngroups_max <= 0)
                 return errno_or_else(EOPNOTSUPP);
 
@@ -1141,7 +1141,7 @@ static int ask_password_conv(
 
                                 if (creds_dir) {
                                         if (setenv("CREDENTIALS_DIRECTORY", creds_dir, /* overwrite= */ true) < 0)
-                                                return log_error_errno(r, "Failed to set $CREDENTIALS_DIRECTORY: %m");
+                                                return log_error_errno(errno, "Failed to set $CREDENTIALS_DIRECTORY: %m");
                                 } else
                                         (void) unsetenv("CREDENTIALS_DIRECTORY");
 
@@ -1210,7 +1210,7 @@ static int pam_close_session_and_delete_credentials(pam_handle_t *handle, int fl
 
         s = sym_pam_setcred(handle, PAM_DELETE_CRED | flags);
         if (s != PAM_SUCCESS)
-                pam_syslog_pam_error(handle, LOG_DEBUG, r, "pam_setcred(PAM_DELETE_CRED) failed: @PAMERR@");
+                pam_syslog_pam_error(handle, LOG_DEBUG, s, "pam_setcred(PAM_DELETE_CRED) failed: @PAMERR@");
 
         return r != PAM_SUCCESS ? r : s;
 }
@@ -1690,8 +1690,16 @@ static int apply_syscall_filter(const ExecContext *c, const ExecParameters *p) {
                 action = negative_action;
         }
 
-        /* Sending over exec_fd or handoff_timestamp_fd requires write() syscall. */
+        /* Sending over exec_fd or handoff_timestamp_fd requires write() syscall.
+         *
+         * Note: this mutates c->syscall_filter despite the 'const ExecContext *c' qualifier.
+         * That is intentional and safe here because apply_syscall_filter() runs only in the
+         * post-fork child, which holds a private copy of the address space; the hashmap
+         * change is never visible to the manager process. */
         if (p->exec_fd >= 0 || p->handoff_timestamp_fd >= 0) {
+                if (c->syscall_allow_list)
+                        log_debug("SystemCallFilter= allow-list in effect; adding 'write' syscall required for exec handoff.");
+
                 r = seccomp_filter_set_add_by_name(c->syscall_filter, c->syscall_allow_list, "write");
                 if (r < 0)
                         return r;
@@ -4046,11 +4054,21 @@ static int apply_root_directory(
         assert(exit_status);
 
         if (params->flags & EXEC_APPLY_CHROOT)
-                if (!needs_mount_ns && context->root_directory)
+                if (!needs_mount_ns && context->root_directory) {
                         if (chroot(runtime->ephemeral_copy ?: context->root_directory) < 0) {
                                 *exit_status = EXIT_CHROOT;
                                 return -errno;
                         }
+
+                        /* chroot(2) changes only the process root, not cwd. Move cwd into the new root
+                         * immediately so that a subsequent apply_working_directory() failure that is
+                         * silently ignored via working_directory_missing_ok cannot leave cwd pointing
+                         * at a pre-chroot dentry outside the new root. */
+                        if (chdir("/") < 0) {
+                                *exit_status = EXIT_CHROOT;
+                                return -errno;
+                        }
+                }
 
         return 0;
 }
@@ -5278,7 +5296,7 @@ int exec_invoke(
                         own_user = getusername_malloc();
                         if (!own_user) {
                                 *exit_status = EXIT_USER;
-                                return log_error_errno(r, "Failed to determine my own user ID: %m");
+                                return log_oom();
                         }
                         u = own_user;
                 } else
@@ -5574,7 +5592,12 @@ int exec_invoke(
         }
 #endif
 
-        if (uid_is_valid(uid)) {
+        /* Only adjust ownership for TTYs we acquired via StandardInput=tty*. If stdin is passed
+         * as an fd, its ownership is managed by the provider of the fd, see exec_context_revert_tty(). */
+        if (uid_is_valid(uid) &&
+            params->stdin_fd < 0 &&
+            exec_input_is_terminal(context->std_input) &&
+            exec_context_tty_path(context)) {
                 r = chown_terminal(STDIN_FILENO, uid);
                 if (r < 0) {
                         *exit_status = EXIT_STDIN;
@@ -5832,8 +5855,10 @@ int exec_invoke(
                  * Users with CAP_SYS_ADMIN can set up user namespaces last because they will be able to
                  * set up all of the other namespaces (i.e. network, mount, UTS) without a user namespace. */
 
-                if (context->user_namespace_path && runtime->shared->userns_storage_socket[0] >= 0)
+                if (context->user_namespace_path && runtime->shared->userns_storage_socket[0] >= 0) {
+                        *exit_status = EXIT_USER;
                         return log_error_errno(SYNTHETIC_ERRNO(EPERM), "UserNamespacePath= is configured, but user namespace setup not permitted");
+                }
 
                 PrivateUsers pu = exec_context_get_effective_private_users(context, params);
                 if (pu == PRIVATE_USERS_NO)
@@ -5906,12 +5931,16 @@ int exec_invoke(
          * case of mount namespaces being less privileged when the mount point list is copied from a
          * different user namespace). */
         if (needs_sandboxing && context->user_namespace_path && runtime->shared && runtime->shared->userns_storage_socket[0] >= 0) {
-                if (!namespace_type_supported(NAMESPACE_USER))
+                if (!namespace_type_supported(NAMESPACE_USER)) {
+                        *exit_status = EXIT_USER;
                         return log_error_errno(SYNTHETIC_ERRNO(EOPNOTSUPP), "UserNamespacePath= is not supported, refusing.");
+                }
 
                 r = setup_shareable_ns(runtime->shared->userns_storage_socket, CLONE_NEWUSER);
-                if (ERRNO_IS_NEG_PRIVILEGE(r))
-                        return log_notice_errno(r, "PrivateUsers= is configured, but user namespace setup not permitted, refusing.");
+                if (ERRNO_IS_NEG_PRIVILEGE(r)) {
+                        *exit_status = EXIT_USER;
+                        return log_error_errno(r, "UserNamespacePath= is configured, but user namespace setup not permitted, refusing.");
+                }
                 if (r < 0) {
                         *exit_status = EXIT_USER;
                         return log_error_errno(r, "Failed to set up user namespacing: %m");
@@ -6389,18 +6418,6 @@ int exec_invoke(
 
         }
 
-        if (!strv_isempty(context->unset_environment)) {
-                char **ee = NULL;
-
-                ee = strv_env_delete(accum_env, 1, context->unset_environment);
-                if (!ee) {
-                        *exit_status = EXIT_MEMORY;
-                        return log_oom();
-                }
-
-                strv_free_and_replace(accum_env, ee);
-        }
-
         _cleanup_strv_free_ char **replaced_argv = NULL, **argv_via_shell = NULL;
         char **final_argv = FLAGS_SET(command->flags, EXEC_COMMAND_VIA_SHELL) ? strv_skip(command->argv, 1) : command->argv;
 
@@ -6423,6 +6440,21 @@ int exec_invoke(
                         _cleanup_free_ char *jb = strv_join(bad_variables, ", ");
                         log_warning("Invalid environment variable name evaluates to an empty string: %s", strna(jb));
                 }
+        }
+
+        /* Apply UnsetEnvironment= after the command line has been expanded, so that the variables it
+         * removes are still available for expansion. Only the environment block passed to the executed
+         * process is affected, not the expansion. */
+        if (!strv_isempty(context->unset_environment)) {
+                char **ee = NULL;
+
+                ee = strv_env_delete(accum_env, 1, context->unset_environment);
+                if (!ee) {
+                        *exit_status = EXIT_MEMORY;
+                        return log_oom();
+                }
+
+                strv_free_and_replace(accum_env, ee);
         }
 
         if (FLAGS_SET(command->flags, EXEC_COMMAND_VIA_SHELL)) {

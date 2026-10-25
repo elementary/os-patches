@@ -189,19 +189,20 @@ static int parse_one_option(const char *option) {
                         return log_oom();
 
         } else if ((val = startswith(option, "size="))) {
+                unsigned key_size;
 
-                r = safe_atou(val, &arg_key_size);
+                r = safe_atou(val, &key_size);
                 if (r < 0) {
                         log_warning_errno(r, "Failed to parse %s, ignoring: %m", option);
                         return 0;
                 }
 
-                if (arg_key_size % 8) {
+                if (key_size % 8) {
                         log_warning("size= not a multiple of 8, ignoring.");
                         return 0;
                 }
 
-                arg_key_size /= 8;
+                arg_key_size = key_size / 8;
 
         } else if ((val = startswith(option, "sector-size="))) {
 
@@ -306,8 +307,6 @@ static int parse_one_option(const char *option) {
                         SET_FLAG(arg_ask_password_flags, ASK_PASSWORD_SILENT, !r);
                 }
         } else if ((val = startswith(option, "password-cache="))) {
-                arg_password_cache_set = true;
-
                 if (streq(val, "read-only")) {
                         arg_ask_password_flags |= ASK_PASSWORD_ACCEPT_CACHED;
                         arg_ask_password_flags &= ~ASK_PASSWORD_PUSH_CACHE;
@@ -320,6 +319,8 @@ static int parse_one_option(const char *option) {
 
                         SET_FLAG(arg_ask_password_flags, ASK_PASSWORD_ACCEPT_CACHED|ASK_PASSWORD_PUSH_CACHE, r);
                 }
+
+                arg_password_cache_set = true;
         } else if (STR_IN_SET(option, "allow-discards", "discard"))
                 arg_discards = true;
         else if (streq(option, "same-cpu-crypt"))
@@ -2018,7 +2019,7 @@ static int attach_luks_or_plain_or_bitlk_by_tpm2(
                                         /* pcrlock_path= */ NULL,
                                         /* primary_alg= */ 0,
                                         key_file, arg_keyfile_size, arg_keyfile_offset,
-                                        key_data, /* n_blobs= */ 1,
+                                        key_data, /* n_blobs= */ iovec_is_set(key_data) ? 1 : 0,
                                         /* policy_hash= */ NULL, /* we don't know the policy hash */
                                         /* n_policy_hash= */ 0,
                                         /* salt= */ NULL,
@@ -2137,7 +2138,10 @@ static int attach_luks_or_plain_or_bitlk_by_tpm2(
                                                 &decrypted_key);
                                 if (IN_SET(r, -EACCES, -ENOLCK))
                                         return log_notice_errno(SYNTHETIC_ERRNO(EAGAIN), "TPM2 PIN unlock failed, falling back to traditional unlocking.");
-                                if (r != -EPERM)
+                                /* Stop unless we should keep iterating to next token because the tried one
+                                 * does not match boot state. For now without -EUCLEAN because currently the
+                                 * only error it reports won't be solved by moving to another token. */
+                                if (!ERRNO_IS_NEG_TPM2_TOKEN_MISMATCH(r))
                                         break;
 
                                 token++; /* try a different token next time */
@@ -2590,6 +2594,9 @@ static int verb_attach(int argc, char *argv[], void *userdata) {
         /* A delicious drop of snake oil */
         (void) safe_mlockall(MCL_CURRENT|MCL_FUTURE|MCL_ONFAULT);
 
+        /* Only erase key files explicitly configured on the command line, never the ones we
+         * auto-discover in /etc/cryptsetup-keys.d/ and /run/cryptsetup-keys.d/: those are shared
+         * resources not owned by an individual volume. (key_file is NULL when auto-discovery is used.) */
         if (key_file && arg_keyfile_erase)
                 destroy_key_file = key_file; /* let's get this baby erased when we leave */
 
@@ -2706,6 +2713,8 @@ static int verb_attach(int argc, char *argv[], void *userdata) {
                                 return r;
                         if (r > 0)
                                 key_data = &discovered_key_data;
+                        else
+                                try_discover_key = false;
                 }
 
                 if (token_type < 0 && !key_file && !key_data && !passwords) {

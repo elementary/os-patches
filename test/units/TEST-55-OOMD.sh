@@ -19,6 +19,20 @@ if [[ -s /skipped ]]; then
     exit 77
 fi
 
+# stress-ng can fail with SIGILL because GCC's target_clones / ifunc resolver
+# picks an AVX-512 variant of a stressor function based on CPUID, even when
+# the actual CPU (e.g. in some VMs) does not implement AVX-512
+STRESS_NG_BROKEN=0
+stress_ng_preflight_out=$(mktemp)
+if ! timeout --kill-after=5s 10s stress-ng --timeout 2s --vm 4 --vm-bytes 10M --vm-keep \
+        >"$stress_ng_preflight_out" 2>&1; then
+    if grep -E "caught SIG(ILL|SEGV|BUS|FPE)" "$stress_ng_preflight_out" >/dev/null; then
+        STRESS_NG_BROKEN=1
+    fi
+fi
+rm -f "$stress_ng_preflight_out"
+unset stress_ng_preflight_out
+
 # Activate swap file if we are in a VM
 if systemd-detect-virt --vm --quiet; then
     swapoff --all
@@ -46,6 +60,13 @@ mkdir -p /run/systemd/system/-.slice.d/
 cat >/run/systemd/system/-.slice.d/99-oomd-test.conf <<EOF
 [Slice]
 ManagedOOMSwap=auto
+EOF
+
+mkdir -p /run/systemd/system/system.slice.d/
+cat >/run/systemd/system/system.slice.d/99-oomd-test.conf <<EOF
+[Slice]
+ManagedOOMMemoryPressure=auto
+ManagedOOMMemoryPressureLimit=0%
 EOF
 
 mkdir -p /run/systemd/system/user@.service.d/
@@ -97,6 +118,8 @@ fi
 test_basic() {
     local cgroup_path="${1:?}"
     shift
+
+    [[ "$STRESS_NG_BROKEN" == "1" ]] && { echo "stress-ng is broken on this host, skipping ${FUNCNAME[0]}"; return 0; }
 
     systemctl "$@" start TEST-55-OOMD-testchill.service
     systemctl "$@" status TEST-55-OOMD-testchill.service
@@ -151,6 +174,8 @@ testcase_preference_avoid() {
         echo "cgroup does not support user xattrs, skipping test for ManagedOOMPreference=avoid"
         return 0
     fi
+
+    [[ "$STRESS_NG_BROKEN" == "1" ]] && { echo "stress-ng is broken on this host, skipping ${FUNCNAME[0]}"; return 0; }
 
     mkdir -p /run/systemd/system/TEST-55-OOMD-testbloat.service.d/
     cat >/run/systemd/system/TEST-55-OOMD-testbloat.service.d/99-managed-oom-preference.conf <<EOF
@@ -213,6 +238,8 @@ EOF
 
 testcase_duration_override() {
     # Verify memory pressure duration can be overridden to non-zero values
+    [[ "$STRESS_NG_BROKEN" == "1" ]] && { echo "stress-ng is broken on this host, skipping ${FUNCNAME[0]}"; return 0; }
+
     mkdir -p /run/systemd/system/TEST-55-OOMD-testmunch.service.d/
     cat >/run/systemd/system/TEST-55-OOMD-testmunch.service.d/99-duration-test.conf <<EOF
 [Service]

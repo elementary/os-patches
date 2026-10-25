@@ -193,7 +193,7 @@ int strextendf_with_separator(char **x, const char *separator, const char *forma
         })
 #define strprepend(x, ...) strprepend_with_separator(x, NULL, __VA_ARGS__)
 
-char* strrep(const char *s, unsigned n);
+char* strrep(const char *s, size_t n);
 
 #define strrepa(s, n)                                                   \
         ({                                                              \
@@ -274,6 +274,7 @@ typedef enum MakeCStringMode {
 int make_cstring(const char *s, size_t n, MakeCStringMode mode, char **ret);
 
 size_t strspn_from_end(const char *str, const char *accept) _pure_;
+size_t strnspn(const char *str, const char *accept, size_t n) _pure_ _nonnull_if_nonzero_(1, 3);
 
 char* strdupspn(const char *a, const char *accept);
 char* strdupcspn(const char *a, const char *reject);
