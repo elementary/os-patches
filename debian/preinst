@@ -19,7 +19,17 @@ if [ "$1" = "install" ] || [ "$1" = "upgrade" ]; then
           msg="/$d is a symbolic link and not pointing at usr/$d exactly"
         fi
       elif [ ! -d "$DPKG_ROOT/usr/$d" ]; then
-        msg="/$d is a dangling symbolic link"
+        case " #USR_MERGE_MULTILIB# " in
+          *" $d "*)
+            # Multilib aliasing symlinks are created on demand by the
+            # postinst and may be left dangling when /usr/$d goes away.
+            echo "Removing dangling /$d symbolic link."
+            rm "$DPKG_ROOT/$d"
+            ;;
+          *)
+            msg="/$d is a dangling symbolic link"
+            ;;
+        esac
       fi
       msg2="This is an unexpected situation. Cannot proceed with the upgrade"
     elif [ -d "$DPKG_ROOT/$d" ]; then
