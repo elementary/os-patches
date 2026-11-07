@@ -76,7 +76,7 @@ except KeyError:
     from subprocess import PIPE, Popen
 
     p1 = Popen(["dpkg-parsechangelog", "-l../../debian/changelog"], stdout=PIPE)
-    p2 = Popen(["sed", "-n", "s/^Version: //p"], stdin=p1.stdout, stdout=PIPE)
+    p2 = Popen(["sed", "-n", "s/^Version: \\([0-9]*\\.[0-9]*\\.[0-9]*\\).*/\\1/p"], stdin=p1.stdout, stdout=PIPE)
     release = p2.communicate()[0].decode("utf-8")
 
 
