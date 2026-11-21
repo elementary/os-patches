@@ -141,8 +141,8 @@ static-configure: stamps/before-build
 bash-doc-build: stamps/stamp-build-bash-doc
 stamps/stamp-build-bash-doc:
 	rm -f bash/doc/bashref.info
-	$(MAKE) -C build-bash/doc info html MAN2HTML=/usr/bin/man2html
-	$(MAKE) -C build-bash/doc bash.pdf bashref.pdf
+	$(MAKE) -B -C build-bash/doc info html MAN2HTML=/usr/bin/man2html
+	$(MAKE) -B -C build-bash/doc bash.pdf bashref.pdf
 	touch stamps/stamp-build-bash-doc
 
 # ---------------------------------------------------------------------------
